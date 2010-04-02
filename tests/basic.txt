@@ -1,0 +1,10 @@
+Hello, World!
+
+This is some e-mail content. Even though it has whitespace and newlines, the e-mail converter will handle it correctly.
+
+Even mismatched tags.
+A div
+Another div
+A div
+within a div
+[A link](http://foo.com)
