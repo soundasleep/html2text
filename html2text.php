@@ -58,15 +58,7 @@ function fix_newlines($text) {
 	return $text;
 }
 
-function iterate_over_node($node) {
-	if ($node instanceof DOMText) {
-		return preg_replace("/\\s+/im", " ", $node->wholeText);
-	}
-	if ($node instanceof DOMDocumentType) {
-		// ignore
-		return "";
-	}
-
+function next_child_name($node) {
 	// get the next child
 	$nextNode = $node->nextSibling;
 	while ($nextNode != null) {
@@ -80,10 +72,44 @@ function iterate_over_node($node) {
 		$nextName = strtolower($nextNode->nodeName);
 	}
 
+	return $nextName;
+}
+function prev_child_name($node) {
+	// get the previous child
+	$nextNode = $node->previousSibling;
+	while ($nextNode != null) {
+		if ($nextNode instanceof DOMElement) {
+			break;
+		}
+		$nextNode = $nextNode->previousSibling;
+	}
+	$nextName = null;
+	if ($nextNode instanceof DOMElement && $nextNode != null) {
+		$nextName = strtolower($nextNode->nodeName);
+	}
+
+	return $nextName;
+}
+
+function iterate_over_node($node) {
+	if ($node instanceof DOMText) {
+		return preg_replace("/\\s+/im", " ", $node->wholeText);
+	}
+	if ($node instanceof DOMDocumentType) {
+		// ignore
+		return "";
+	}
+
+	$nextName = next_child_name($node);
+	$prevName = prev_child_name($node);
+
 	$name = strtolower($node->nodeName);
 
 	// start whitespace
 	switch ($name) {
+		case "hr":
+			return "------\n";
+
 		case "style":
 		case "head":
 		case "title":
@@ -161,11 +187,27 @@ function iterate_over_node($node) {
 		case "a":
 			// links are returned in [text](link) format
 			$href = $node->getAttribute("href");
-			if ($href == $output) {
-				// link to the same address: just use link
-				return $output;
+			if ($href == null) {
+				// it doesn't link anywhere
+				if ($node->getAttribute("name") != null) {
+					$output = "[$output]";
+				}
+			} else {
+				if ($href == $output) {
+					// link to the same address: just use link
+					$output;
+				} else {
+					// replace it
+					$output = "[$output]($href)";
+				}
 			}
-			return "[$output]($href)";
+
+			// does the next node require additional whitespace?
+			switch ($nextName) {
+				case "h1": case "h2": case "h3": case "h4": case "h5": case "h6":
+					$output .= "\n";
+					break;
+			}
 
 		default:
 			// do nothing

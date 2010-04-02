@@ -3,7 +3,8 @@
 require("../html2text.php");
 
 $tests = array(
-	"basic"
+	"basic",
+	"anchors"
 );
 
 $passed = 0;
@@ -30,6 +31,7 @@ foreach ($tests as $test) {
 		file_put_contents("$test.output", $output);
 
 		// mark whitespace
+		/*
 		$output = str_replace(" ", ".", $output);
 		$expected = str_replace(" ", ".", $expected);
 		$output = str_replace("\t", " -> ", $output);
@@ -38,6 +40,7 @@ foreach ($tests as $test) {
 		$expected = str_replace("\r", "\\r\r", $expected);
 		$output = str_replace("\n", "\\n\n", $output);
 		$expected = str_replace("\n", "\\n\n", $expected);
+		*/
 
 		echo "FAILED: Expected:\n$expected\n\nGot:\n$output\n\n";
 		$failed++;
