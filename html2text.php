@@ -130,7 +130,6 @@ function iterate_over_node($node) {
 
 		case "p":
 		case "div":
-		case "br":
 			// add one line
 			$output = "\n";
 			break;

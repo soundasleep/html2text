@@ -4,7 +4,8 @@ require("../html2text.php");
 
 $tests = array(
 	"basic",
-	"anchors"
+	"anchors",
+	"test3",
 );
 
 $passed = 0;
