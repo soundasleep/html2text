@@ -6,6 +6,7 @@ $tests = array(
 	"basic",
 	"anchors",
 	"test3",
+	"test4",
 );
 
 $passed = 0;
