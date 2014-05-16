@@ -54,6 +54,12 @@ You can use [Composer](http://getcomposer.org/) to add the [package](https://pac
 }
 ```
 
+And then use it quite simply:
+
+```php
+$text = convert_html_to_text($html);
+```
+
 ## Tests
 
 Some very basic tests are provided in the `tests/` directory. Run them with `php -f run.php`.
