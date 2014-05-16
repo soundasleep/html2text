@@ -93,7 +93,7 @@ function prev_child_name($node) {
 
 function iterate_over_node($node) {
 	if ($node instanceof DOMText) {
-		return preg_replace("/\\s+/im", " ", $node->wholeText);
+		return preg_replace("/[\\t\\n\\v\\f\\r ]+/im", " ", $node->wholeText);
 	}
 	if ($node instanceof DOMDocumentType) {
 		// ignore
