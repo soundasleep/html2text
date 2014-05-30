@@ -20,8 +20,9 @@
  *   <li>Information in the &lt;head&gt; is lost
  * </ul>
  *
- * @param html the input HTML
- * @return the HTML converted, as best as possible, to text
+ * @param string html the input HTML
+ * @return string the HTML converted, as best as possible, to text
+ * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
  */
 function convert_html_to_text($html) {
 	$html = fix_newlines($html);
@@ -46,8 +47,8 @@ function convert_html_to_text($html) {
  * then \r becomes \n. This means that all newlines (Unix, Windows, Mac)
  * all become \ns.
  *
- * @param text text with any number of \r, \r\n and \n combinations
- * @return the fixed text
+ * @param string text text with any number of \r, \r\n and \n combinations
+ * @return string the fixed text
  */
 function fix_newlines($text) {
 	// replace \r\n to \n
