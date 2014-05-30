@@ -49,7 +49,7 @@ You can use [Composer](http://getcomposer.org/) to add the [package](https://pac
 ```json
 {
   "require": {
-    "soundasleep/html2text": "~0.1.0"
+    "soundasleep/html2text": "~0.1.1"
   }
 }
 ```
@@ -63,4 +63,3 @@ $text = convert_html_to_text($html);
 ## Tests
 
 Some very basic tests are provided in the `tests/` directory. Run them with `php -f run.php`.
-
