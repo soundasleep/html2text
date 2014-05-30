@@ -192,7 +192,7 @@ function iterate_over_node($node) {
 					$output = "[$output]";
 				}
 			} else {
-				if ($href == $output) {
+				if ($href == $output || $href == "mailto:$output" || $href == "http://$output" || $href == "https://$output") {
 					// link to the same address: just use link
 					$output;
 				} else {
