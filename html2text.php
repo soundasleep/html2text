@@ -144,12 +144,14 @@ function iterate_over_node($node) {
 	// debug
 	//$output .= "[$name,$nextName]";
 
-	for ($i = 0; $i < $node->childNodes->length; $i++) {
-		$n = $node->childNodes->item($i);
+	if (isset($node->childNodes)) {
+		for ($i = 0; $i < $node->childNodes->length; $i++) {
+			$n = $node->childNodes->item($i);
 
-		$text = iterate_over_node($n);
+			$text = iterate_over_node($n);
 
-		$output .= $text;
+			$output .= $text;
+		}
 	}
 
 	// end whitespace
