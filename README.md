@@ -63,3 +63,7 @@ $text = convert_html_to_text($html);
 ## Tests
 
 Some very basic tests are provided in the `tests/` directory. Run them with `php -f run.php`.
+
+## License
+
+`html2text` is dual licensed under both [EPL v1.0](https://www.eclipse.org/legal/epl-v10.html) and [LGPL v3.0](http://www.gnu.org/licenses/lgpl.html), making it suitable for both Eclipse and GPL projects.
