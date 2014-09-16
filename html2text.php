@@ -30,11 +30,20 @@
  * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
  */
 function convert_html_to_text($html) {
+	if ($html == '') { //DOMDocument doesn't support empty value and throws an error
+		return '';
+	}
+	
 	$html = fix_newlines($html);
 
-	$doc = new DOMDocument();
-	if (!$doc->loadHTML($html))
+
+	$doc = new \DOMDocument();
+	$prevValue = libxml_use_internal_errors(true); //prevent $doc to trhow any warnings
+	$loaded = $doc->loadHTML($html);
+	libxml_use_internal_errors($prevValue); //restore original setting
+	if (!$loaded) {
 		throw new Html2TextException("Could not load HTML - badly formed?", $html);
+	}
 
 	$output = iterate_over_node($doc);
 
