@@ -44,7 +44,7 @@ See the [original blog post](http://journals.jevon.org/users/jevon-phd/entry/198
 
 ## Installing
 
-You can use [Composer](http://getcomposer.org/) to add the [package](https://packagist.org/packages/soundasleep/jsonrpcclient) to your project:
+You can use [Composer](http://getcomposer.org/) to add the [package](https://packagist.org/packages/soundasleep/html2text) to your project:
 
 ```json
 {
