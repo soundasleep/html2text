@@ -33,15 +33,15 @@ class Html2Text {
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
 	 */
-	function convert($html) {
-		$html = $this->fixNewlines($html);
+	static function convert($html) {
+		$html = static::fixNewlines($html);
 
 		$doc = new \DOMDocument();
 		if (!$doc->loadHTML($html)) {
 			throw new Html2TextException("Could not load HTML - badly formed?", $html);
 		}
 
-		$output = $this->iterateOverNode($doc);
+		$output = static::iterateOverNode($doc);
 
 		// remove leading and trailing spaces on each line
 		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
@@ -60,7 +60,7 @@ class Html2Text {
 	 * @param string text text with any number of \r, \r\n and \n combinations
 	 * @return string the fixed text
 	 */
-	function fixNewlines($text) {
+	static function fixNewlines($text) {
 		// replace \r\n to \n
 		$text = str_replace("\r\n", "\n", $text);
 		// remove \rs
@@ -69,7 +69,7 @@ class Html2Text {
 		return $text;
 	}
 
-	function nextChildName($node) {
+	static function nextChildName($node) {
 		// get the next child
 		$nextNode = $node->nextSibling;
 		while ($nextNode != null) {
@@ -86,7 +86,7 @@ class Html2Text {
 		return $nextName;
 	}
 
-	function prevChildName($node) {
+	static function prevChildName($node) {
 		// get the previous child
 		$nextNode = $node->previousSibling;
 		while ($nextNode != null) {
@@ -103,7 +103,7 @@ class Html2Text {
 		return $nextName;
 	}
 
-	function iterateOverNode($node) {
+	static function iterateOverNode($node) {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			return preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $node->wholeText);
@@ -113,8 +113,8 @@ class Html2Text {
 			return "";
 		}
 
-		$nextName = $this->nextChildName($node);
-		$prevName = $this->prevChildName($node);
+		$nextName = static::nextChildName($node);
+		$prevName = static::prevChildName($node);
 
 		$name = strtolower($node->nodeName);
 
@@ -160,7 +160,7 @@ class Html2Text {
 			for ($i = 0; $i < $node->childNodes->length; $i++) {
 				$n = $node->childNodes->item($i);
 
-				$text = $this->iterateOverNode($n);
+				$text = static::iterateOverNode($n);
 
 				$output .= $text;
 			}
