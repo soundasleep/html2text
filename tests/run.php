@@ -7,7 +7,6 @@ $tests = array(
 	"anchors",
 	"test3",
 	"test4",
-	"breaking",
 	"more-anchors",
 );
 

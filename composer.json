@@ -17,7 +17,9 @@
     "php": ">=5.3.2"
   },
   "autoload": {
-    "files": ["html2text.php"]
+    "psr-4": {
+      "Html2Text\\": "."
+    }
   },
   "support": {
     "email": "support@jevon.org"
