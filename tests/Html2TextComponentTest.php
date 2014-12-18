@@ -1,6 +1,6 @@
 <?php
 
-class ComponentTest extends \ComponentTests\ComponentTest {
+class Html2TextComponentTest extends \ComponentTests\ComponentTest {
 
 	function getRoots() {
 		return array(__DIR__ . "/..");
