@@ -31,10 +31,11 @@ class Html2Text {
 	 *
 	 * @param string html the input HTML
 	 * @param bool simple_links false (default) to show links in "[text](link)" format, true to display links in "text" only format
+	 * @param array tag_info - returns data by reference, pass an empty array activate - the array returned will have the tag name as the key and how many times it occurred as the value
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
 	 */
-	static function convert($html, $simple_links = false) {
+	static function convert($html, $simple_links = false, &$tag_info = null ) {
 		$html = static::fixNewlines($html);
 
 		$doc = new \DOMDocument();
@@ -42,7 +43,7 @@ class Html2Text {
 			throw new Html2TextException("Could not load HTML - badly formed?", $html);
 		}
 
-		$output = static::iterateOverNode($doc, $simple_links);
+		$output = static::iterateOverNode($doc, $simple_links, $tag_info);
 
 		// remove leading and trailing spaces on each line
 		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
@@ -104,7 +105,7 @@ class Html2Text {
 		return $nextName;
 	}
 
-	static function iterateOverNode($node, $simple_links = false) {
+	static function iterateOverNode($node, $simple_links = false, &$tag_info = null) {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			return preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $node->wholeText);
@@ -118,6 +119,10 @@ class Html2Text {
 		$prevName = static::prevChildName($node);
 
 		$name = strtolower($node->nodeName);
+
+		if (!is_null($tag_info)) {
+			$tag_info[$name]++; // build tag stats
+		}
 
 		// start whitespace
 		switch ($name) {
@@ -154,7 +159,10 @@ class Html2Text {
 				// add one line
 				$output = "\n";
 				break;
-
+			case "img":
+				if (!is_null($tag_info)) {
+					$tag_info['img_src'][] = $node->getAttribute("src"); // build array of image urls
+				}
 			default:
 				// print out contents of unknown tags
 				$output = "";
@@ -168,7 +176,7 @@ class Html2Text {
 			for ($i = 0; $i < $node->childNodes->length; $i++) {
 				$n = $node->childNodes->item($i);
 
-				$text = static::iterateOverNode($n, $simple_links);
+				$text = static::iterateOverNode($n, $simple_links, $tag_info);
 
 				$output .= $text;
 			}
