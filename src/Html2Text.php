@@ -30,10 +30,11 @@ class Html2Text {
 	 * </ul>
 	 *
 	 * @param string html the input HTML
+	 * @param bool simple_links false (default) to show links in "[text](link)" format, true to display links in "text" only format
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
 	 */
-	static function convert($html) {
+	static function convert($html, $simple_links = false) {
 		$html = static::fixNewlines($html);
 
 		$doc = new \DOMDocument();
@@ -41,7 +42,7 @@ class Html2Text {
 			throw new Html2TextException("Could not load HTML - badly formed?", $html);
 		}
 
-		$output = static::iterateOverNode($doc);
+		$output = static::iterateOverNode($doc, $simple_links);
 
 		// remove leading and trailing spaces on each line
 		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
@@ -103,7 +104,7 @@ class Html2Text {
 		return $nextName;
 	}
 
-	static function iterateOverNode($node) {
+	static function iterateOverNode($node, $simple_links = false) {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			return preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $node->wholeText);
@@ -167,7 +168,7 @@ class Html2Text {
 			for ($i = 0; $i < $node->childNodes->length; $i++) {
 				$n = $node->childNodes->item($i);
 
-				$text = static::iterateOverNode($n);
+				$text = static::iterateOverNode($n, $simple_links);
 
 				$output .= $text;
 			}
@@ -206,20 +207,22 @@ class Html2Text {
 				break;
 
 			case "a":
-				// links are returned in [text](link) format
-				$href = $node->getAttribute("href");
-				if ($href == null) {
-					// it doesn't link anywhere
-					if ($node->getAttribute("name") != null) {
-						$output = "[$output]";
-					}
-				} else {
-					if ($href == $output || $href == "mailto:$output" || $href == "http://$output" || $href == "https://$output") {
-						// link to the same address: just use link
-						$output;
+
+				if ($simple_links == false) { // links are returned in [text](link) format
+					$href = $node->getAttribute("href");
+					if ($href == null) {
+						// it doesn't link anywhere
+						if ($node->getAttribute("name") != null) {
+							$output = "[$output]";
+						}
 					} else {
-						// replace it
-						$output = "[$output]($href)";
+						if ($href == $output || $href == "mailto:$output" || $href == "http://$output" || $href == "https://$output") {
+							// link to the same address: just use link
+							$output;
+						} else {
+							// replace it
+							$output = "[$output]($href)";
+						}
 					}
 				}
 

@@ -2,13 +2,13 @@
 
 class Html2TextTest extends PHPUnit_Framework_TestCase {
 
-	function doTest($test) {
+	function doTest($test, $simple_links = false) {
 		$this->assertTrue(file_exists(__DIR__ . "/$test.html"), "File '$test.html' did not exist");
 		$this->assertTrue(file_exists(__DIR__ . "/$test.txt"), "File '$test.txt' did not exist");
 		$input = file_get_contents(__DIR__ . "/$test.html");
 		$expected = Html2Text\Html2Text::fixNewlines(file_get_contents(__DIR__ . "/$test.txt"));
 
-		$output = Html2Text\Html2Text::convert($input);
+		$output = Html2Text\Html2Text::convert($input, $simple_links);
 
 		if ($output != $expected) {
 			file_put_contents(__DIR__ . "/$test.output", $output);
@@ -38,6 +38,10 @@ class Html2TextTest extends PHPUnit_Framework_TestCase {
 
 	function testTable() {
 		$this->doTest("table");
+	}
+
+	function testAnchorsSimpleLinks() {
+		$this->doTest("anchors_simple_links", true);
 	}
 
 }
