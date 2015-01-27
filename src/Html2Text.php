@@ -137,10 +137,17 @@ class Html2Text {
 			case "h4":
 			case "h5":
 			case "h6":
-				// add two newlines
+				// add two newlines, second line is added below
 				$output = "\n";
 				break;
 
+			case "td":
+			case "th":
+				// add tab char to separate table fields
+			   $output = "\t";
+			   break;
+
+			case "tr":
 			case "p":
 			case "div":
 				// add one line
