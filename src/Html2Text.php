@@ -34,6 +34,9 @@ class Html2Text {
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
 	 */
 	static function convert($html) {
+		// replace &nbsp; with spaces
+		$html = str_replace("&nbsp;", " ", $html);
+
 		$html = static::fixNewlines($html);
 
 		$doc = new \DOMDocument();
