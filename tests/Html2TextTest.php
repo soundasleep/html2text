@@ -40,4 +40,8 @@ class Html2TextTest extends PHPUnit_Framework_TestCase {
 		$this->doTest("table");
 	}
 
+	function testNbsp() {
+		$this->doTest("nbsp");
+	}
+
 }
