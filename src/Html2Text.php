@@ -156,7 +156,10 @@ class Html2Text {
 				// add one line
 				$output = "\n";
 				break;
-
+			case "li":
+				// add one line
+				$output = "-";
+				break;
 			default:
 				// print out contents of unknown tags
 				$output = "";
@@ -201,7 +204,10 @@ class Html2Text {
 				if ($nextName != "div")
 					$output .= "\n";
 				break;
-
+			case "li":
+				// add one line
+				$output .= "\n";
+				break;
 			case "div":
 				// add one line only if the next child isn't a div
 				if ($nextName != "div" && $nextName != null)
