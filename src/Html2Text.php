@@ -140,6 +140,8 @@ class Html2Text {
 			case "h4":
 			case "h5":
 			case "h6":
+			case "ol":
+			case "ul":
 				// add two newlines, second line is added below
 				$output = "\n";
 				break;
@@ -155,6 +157,10 @@ class Html2Text {
 			case "div":
 				// add one line
 				$output = "\n";
+				break;
+
+			case "li":
+				$output = "- ";
 				break;
 
 			default:
@@ -232,6 +238,11 @@ class Html2Text {
 						$output .= "\n";
 						break;
 				}
+				break;
+
+			case "li":
+				$output .= "\n";
+				break;
 
 			default:
 				// do nothing
