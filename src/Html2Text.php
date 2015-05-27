@@ -56,13 +56,25 @@ class Html2Text {
 		// reset
 		Html2Text::$_indexedUrls = array();
 
+		// DOMDocument doesn't support empty value and throws an error
+		if (!$html) {
+			return '';
+		}
+
 		// replace &nbsp; with spaces
 		$html = str_replace("&nbsp;", " ", $html);
 
 		$html = static::fixNewlines($html);
 
 		$doc = new \DOMDocument();
-		if (!$doc->loadHTML($html)) {
+		$doc->strictErrorChecking = FALSE;
+		$doc->recover = TRUE;
+		$doc->xmlStandalone = true;
+		$prevValue = libxml_use_internal_errors(true); //prevent $doc to trhow any warnings
+		$loaded = $doc->loadHTML($html,LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET);
+		libxml_use_internal_errors($prevValue); //restore original setting
+
+		if (!$loaded) {
 			throw new Html2TextException("Could not load HTML - badly formed?", $html);
 		}
 
