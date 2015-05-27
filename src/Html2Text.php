@@ -163,6 +163,10 @@ class Html2Text {
 				$output = "- ";
 				break;
 
+			case "img":
+				$output = $node->getAttribute("alt");
+				break;
+
 			default:
 				// print out contents of unknown tags
 				$output = "";
