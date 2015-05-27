@@ -20,6 +20,23 @@ namespace Html2Text;
 class Html2Text {
 
 	/**
+	 * Replaces URLs from <a> tags with a reference number (eg: "[1]") and moves the URL itself to
+	 * the end of the document. Makes the resulting text much easier to read if your HTML contains
+	 * many long URLs. The downside being the user has to scroll to the bottom of the document in
+	 * order to find (and click on) the URL. It's a trade off and a decision you can make per
+	 * document.
+	 */
+	const OPT_FOOTER_URLS = 1;
+
+	/**
+	 * If you use the OPT_FOOTER_URLS option, this variable will keep track of which indexes point
+	 * to which URLs, so they can be inserted at the end of the converted text.
+	 * @var array Associative array, where the key is a URL, and the value is an associative array
+	 *     of properties (currently "index" and "text").
+	 */
+	static $_indexedUrls = array();
+
+	/**
 	 * Tries to convert the given HTML into a plain text format - best suited for
 	 * e-mail display, etc.
 	 *
@@ -30,10 +47,15 @@ class Html2Text {
 	 * </ul>
 	 *
 	 * @param string html the input HTML
+	 * @param array An array of options of the Html2Text::OPT_* variety
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
 	 */
-	static function convert($html) {
+	static function convert($html,$options=array()) {
+
+		// reset
+		Html2Text::$_urls = array();
+
 		// replace &nbsp; with spaces
 		$html = str_replace("&nbsp;", " ", $html);
 
@@ -44,13 +66,21 @@ class Html2Text {
 			throw new Html2TextException("Could not load HTML - badly formed?", $html);
 		}
 
-		$output = static::iterateOverNode($doc);
+		$output = static::iterateOverNode($doc,$options);
 
 		// remove leading and trailing spaces on each line
 		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
 
 		// remove leading and trailing whitespace
 		$output = trim($output);
+
+		// if they want URLs at the end of the document instead of inline, append them here
+		if (in_array(static::OPT_FOOTER_URLS,$options) && Html2Text::$_urls) {
+			$output .= "\n\n------\n\n";
+			foreach (Html2Text::$_urls as $url=>$info) {
+				$output .= "[".$info['index']."] ".($info['text']?$info['text']." ":"").$url."\n";
+			}
+		}
 
 		return $output;
 	}
@@ -106,7 +136,7 @@ class Html2Text {
 		return $nextName;
 	}
 
-	static function iterateOverNode($node) {
+	static function iterateOverNode($node,&$options) {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			return preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $node->wholeText);
@@ -180,7 +210,7 @@ class Html2Text {
 			for ($i = 0; $i < $node->childNodes->length; $i++) {
 				$n = $node->childNodes->item($i);
 
-				$text = static::iterateOverNode($n);
+				$text = static::iterateOverNode($n,$options);
 
 				$output .= $text;
 			}
@@ -230,6 +260,8 @@ class Html2Text {
 					if ($href == $output || $href == "mailto:$output" || $href == "http://$output" || $href == "https://$output") {
 						// link to the same address: just use link
 						$output;
+					} elseif (in_array(static::OPT_FOOTER_URLS,$options)) {
+						$output = $output."[".static::_indexUrl($href,$output)."]";
 					} else {
 						// replace it
 						$output = "[$output]($href)";
@@ -253,6 +285,22 @@ class Html2Text {
 		}
 
 		return $output;
+	}
+
+	/**
+	 * Accepts a URL (and optionally the link text) and returns a unique index number for that URL.
+	 * @param  string $url  The URL you want an index number for.
+	 * @param  string $text The text of the link (associated with the above URL).
+	 * @return integer      The index number that will refer to the URL passed.
+	 */
+	static function _indexUrl($url,$text=null) {
+		if (!isset(static::$_urls[$url])) {
+			static::$_urls[$url] = array(
+				'index'=>count(static::$_urls),
+				'text'=>$text,
+			);
+		}
+		return static::$_urls[$url]['index'];
 	}
 
 }
