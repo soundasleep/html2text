@@ -54,7 +54,7 @@ class Html2Text {
 	static function convert($html,$options=array()) {
 
 		// reset
-		Html2Text::$_urls = array();
+		Html2Text::$_indexedUrls = array();
 
 		// replace &nbsp; with spaces
 		$html = str_replace("&nbsp;", " ", $html);
@@ -75,9 +75,9 @@ class Html2Text {
 		$output = trim($output);
 
 		// if they want URLs at the end of the document instead of inline, append them here
-		if (in_array(static::OPT_FOOTER_URLS,$options) && Html2Text::$_urls) {
+		if (in_array(static::OPT_FOOTER_URLS,$options) && Html2Text::$_indexedUrls) {
 			$output .= "\n\n------\n\n";
-			foreach (Html2Text::$_urls as $url=>$info) {
+			foreach (Html2Text::$_indexedUrls as $url=>$info) {
 				$output .= "[".$info['index']."] ".($info['text']?$info['text']." ":"").$url."\n";
 			}
 		}
@@ -294,13 +294,13 @@ class Html2Text {
 	 * @return integer      The index number that will refer to the URL passed.
 	 */
 	static function _indexUrl($url,$text=null) {
-		if (!isset(static::$_urls[$url])) {
-			static::$_urls[$url] = array(
-				'index'=>count(static::$_urls),
+		if (!isset(static::$_indexedUrls[$url])) {
+			static::$_indexedUrls[$url] = array(
+				'index'=>count(static::$_indexedUrls),
 				'text'=>$text,
 			);
 		}
-		return static::$_urls[$url]['index'];
+		return static::$_indexedUrls[$url]['index'];
 	}
 
 }
