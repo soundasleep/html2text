@@ -40,6 +40,7 @@ class Html2Text {
 		$html = static::fixNewlines($html);
 
 		$doc = new \DOMDocument();
+        libxml_use_internal_errors(true);
 		if (!$doc->loadHTML($html)) {
 			throw new Html2TextException("Could not load HTML - badly formed?", $html);
 		}
