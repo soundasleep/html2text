@@ -62,6 +62,12 @@ $text = Html2Text\Html2Text::convert($html);
 
 You can also include the supplied `html2text.php` and use `$text = convert_html_to_text($html);` instead.
 
+## convert a html file to txt via php command directly.
+
+suppose you have a html file named `test.html`, and you need convert it to txt file.
+
+    php convert.php test.html test.txt 
+
 ## Tests
 
 Some very basic tests are provided in the `tests/` directory. Run them with `composer install --dev && vendor/bin/phpunit`.
