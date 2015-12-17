@@ -69,3 +69,7 @@ Some very basic tests are provided in the `tests/` directory. Run them with `com
 ## License
 
 `html2text` is dual licensed under both [EPL v1.0](https://www.eclipse.org/legal/epl-v10.html) and [LGPL v3.0](http://www.gnu.org/licenses/lgpl.html), making it suitable for both Eclipse and GPL projects.
+
+## Other versions
+
+Also see [html2text_ruby](https://github.com/soundasleep/html2text_ruby), a Ruby implementation.
