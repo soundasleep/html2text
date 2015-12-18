@@ -36,6 +36,7 @@ class Html2Text {
 	static function convert($html) {
 		// replace &nbsp; with spaces
 		$html = str_replace("&nbsp;", " ", $html);
+		$html = str_replace("\xa0", " ", $html);
 
 		$html = static::fixNewlines($html);
 
@@ -48,6 +49,10 @@ class Html2Text {
 
 		// remove leading and trailing spaces on each line
 		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
+		$output = preg_replace("/ *\t */im", "\t", $output);
+
+		// remove unnecessary empty lines
+		$output = preg_replace("/\n\n\n*/im", "\n\n", $output);
 
 		// remove leading and trailing whitespace
 		$output = trim($output);
@@ -124,7 +129,7 @@ class Html2Text {
 		// start whitespace
 		switch ($name) {
 			case "hr":
-				return "------\n";
+				return "---------------------------------------------------------------\n";
 
 			case "style":
 			case "head":
@@ -184,14 +189,6 @@ class Html2Text {
 
 		// end whitespace
 		switch ($name) {
-			case "style":
-			case "head":
-			case "title":
-			case "meta":
-			case "script":
-				// ignore these tags
-				return "";
-
 			case "h1":
 			case "h2":
 			case "h3":
@@ -217,6 +214,24 @@ class Html2Text {
 			case "a":
 				// links are returned in [text](link) format
 				$href = $node->getAttribute("href");
+
+				$output = trim($output);
+
+				// remove double [[ ]] s from linking images
+				if (substr($output, 0, 1) == "[" && substr($output, -1) == "]") {
+					$output = substr($output, 1, strlen($output) - 2);
+
+					// for linking images, the title of the <a> overrides the title of the <img>
+					if ($node->getAttribute("title")) {
+						$output = $node->getAttribute("title");
+					}
+				}
+
+				// if there is no link text, but a title attr
+				if (!$output && $node->getAttribute("title")) {
+					$output = $node->getAttribute("title");
+				}
+
 				if ($href == null) {
 					// it doesn't link anywhere
 					if ($node->getAttribute("name") != null) {
@@ -228,7 +243,12 @@ class Html2Text {
 						$output;
 					} else {
 						// replace it
-						$output = "[$output]($href)";
+						if ($output) {
+							$output = "[$output]($href)";
+						} else {
+							// empty string
+							$output = $href;
+						}
 					}
 				}
 
@@ -237,6 +257,16 @@ class Html2Text {
 					case "h1": case "h2": case "h3": case "h4": case "h5": case "h6":
 						$output .= "\n";
 						break;
+				}
+				break;
+
+			case "img":
+				if ($node->getAttribute("title")) {
+					$output = "[" . $node->getAttribute("title") . "]";
+				} elseif ($node->getAttribute("alt")) {
+					$output = "[" . $node->getAttribute("alt") . "]";
+				} else {
+					$output = "";
 				}
 				break;
 
