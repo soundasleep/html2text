@@ -182,6 +182,10 @@ class Html2Text {
 				$output = "~~";
 				break;
 
+			case "code":
+				$output = "`";
+				break;
+
 			default:
 				// print out contents of unknown tags
 				$output = "";
@@ -300,6 +304,10 @@ class Html2Text {
 
 			case "del":
 				$output .= "~~";
+				break;
+
+			case "code":
+				$output .= "`";
 				break;
 
 			default:
