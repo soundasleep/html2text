@@ -168,6 +168,20 @@ class Html2Text {
 				$output = "- ";
 				break;
 
+			case "b":
+			case "strong":
+				$output = "**";
+				break;
+
+			case "i":
+			case "em":
+				$output = "_";
+				break;
+
+			case "del":
+				$output = "~~";
+				break;
+
 			default:
 				// print out contents of unknown tags
 				$output = "";
@@ -272,6 +286,20 @@ class Html2Text {
 
 			case "li":
 				$output .= "\n";
+				break;
+
+			case "b":
+			case "strong":
+				$output .= "**";
+				break;
+
+			case "i":
+			case "em":
+				$output .= "_";
+				break;
+
+			case "del":
+				$output .= "~~";
 				break;
 
 			default:
