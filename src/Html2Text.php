@@ -39,7 +39,9 @@ class Html2Text {
 		$html = str_replace("\xc2\xa0", " ", $html);
 
 		$html = static::fixNewlines($html);
-		$html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
+		if (mb_detect_encoding($html, "UTF-8", true)) {
+			$html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
+		}
 
 		$doc = new \DOMDocument();
 		if (!$doc->loadHTML($html)) {
