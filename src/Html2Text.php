@@ -38,6 +38,9 @@ class Html2Text {
 		$html = str_replace("&nbsp;", " ", $html);
 		$html = str_replace("\xc2\xa0", " ", $html);
 
+		// remove office namespace
+		$html = str_replace(array("<o:p>", "</o:p>"), "", $html);
+
 		$html = static::fixNewlines($html);
 		if (mb_detect_encoding($html, "UTF-8", true)) {
 			$html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
@@ -47,6 +50,8 @@ class Html2Text {
 		if (!$doc->loadHTML($html)) {
 			throw new Html2TextException("Could not load HTML - badly formed?", $html);
 		}
+
+		$doc = static::fixMSEncoding($doc);
 
 		$output = static::iterateOverNode($doc);
 
@@ -78,6 +83,23 @@ class Html2Text {
 		$text = str_replace("\r", "\n", $text);
 
 		return $text;
+	}
+
+	static function fixMSEncoding($doc) {
+		$paras = $doc->getElementsByTagName('p');
+		for ($i = $paras->length; --$i >= 0; ) {
+			$para = $paras->item($i);
+			if ($para->getAttribute('class') == 'MsoNormal') {
+				$fragment = $doc->createDocumentFragment();
+				$fragment->appendChild($doc->createTextNode($para->nodeValue));
+				$fragment->appendChild($doc->createElement('br'));
+				$new_node = $para->parentNode->replaceChild($fragment, $para);
+			}
+		}
+
+		$doc->loadHTML($doc->saveHTML());
+
+		return $doc;
 	}
 
 	static function nextChildName($node) {
