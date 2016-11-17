@@ -29,7 +29,7 @@ class Html2Text {
 	 *   <li>Information in the &lt;head&gt; is lost
 	 * </ul>
 	 *
-	 * @param string html the input HTML
+	 * @param string $html the input HTML
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
 	 */
