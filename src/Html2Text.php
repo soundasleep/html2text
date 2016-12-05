@@ -33,7 +33,7 @@ class Html2Text {
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
 	 */
-	static function convert($html) {
+	public static function convert($html) {
 		// replace &nbsp; with spaces
 		$html = str_replace("&nbsp;", " ", $html);
 		$html = str_replace("\xc2\xa0", " ", $html);
