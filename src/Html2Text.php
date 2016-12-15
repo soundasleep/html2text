@@ -201,6 +201,8 @@ class Html2Text {
 			case "h2":
 			case "h3":
 			case "h4":
+			$output = "\n ** ";
+			break;
 			case "h5":
 			case "h6":
 			case "ol":
@@ -251,6 +253,8 @@ class Html2Text {
 			case "h2":
 			case "h3":
 			case "h4":
+			$output .= "\n ------------------------------------------------------------ \n";
+			break;
 			case "h5":
 			case "h6":
 				$output .= "\n";
