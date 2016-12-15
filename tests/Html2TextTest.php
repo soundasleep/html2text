@@ -2,13 +2,13 @@
 
 class Html2TextTest extends PHPUnit_Framework_TestCase {
 
-	function doTest($test) {
+	function doTest($test, $ignoreXmlError = false) {
 		$this->assertTrue(file_exists(__DIR__ . "/$test.html"), "File '$test.html' did not exist");
 		$this->assertTrue(file_exists(__DIR__ . "/$test.txt"), "File '$test.txt' did not exist");
 		$input = file_get_contents(__DIR__ . "/$test.html");
 		$expected = Html2Text\Html2Text::fixNewlines(file_get_contents(__DIR__ . "/$test.txt"));
 
-		$output = Html2Text\Html2Text::convert($input);
+		$output = Html2Text\Html2Text::convert($input, $ignoreXmlError);
 
 		if ($output != $expected) {
 			file_put_contents(__DIR__ . "/$test.output", $output);
@@ -48,6 +48,10 @@ class Html2TextTest extends PHPUnit_Framework_TestCase {
 		$this->doTest("lists");
 	}
 
+	function testPre() {
+		$this->doTest("pre");
+	}
+
 	function testFullEmail() {
 		$this->doTest("full_email");
 	}
@@ -72,4 +76,14 @@ class Html2TextTest extends PHPUnit_Framework_TestCase {
 		$this->doTest("msoffice");
 	}
 
+	/**
+     * @expectedException PHPUnit_Framework_Error_Warning
+     */
+	function testInvalidXML() {
+		$this->doTest("invalid", false);
+	}
+
+	function testInvalidXMLIgnore() {
+		$this->doTest("invalid", true);
+	}
 }
