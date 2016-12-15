@@ -30,10 +30,11 @@ class Html2Text {
 	 * </ul>
 	 *
 	 * @param string $html the input HTML
+	 * @param boolean $ignore_error Ignore xml parsing errors
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
 	 */
-	public static function convert($html) {
+	public static function convert($html, $ignore_error = false) {
 		// replace &nbsp; with spaces
 		$html = str_replace("&nbsp;", " ", $html);
 		$html = str_replace("\xc2\xa0", " ", $html);
@@ -49,7 +50,10 @@ class Html2Text {
 		}
 
 		$doc = new \DOMDocument();
-		if (!$doc->loadHTML($html)) {
+		if ($ignore_error) $old_internal_errors = libxml_use_internal_errors(true);
+		$load_result = $doc->loadHTML($html);
+		if ($ignore_error) libxml_use_internal_errors($old_internal_errors);
+		if (!$load_result) {
 			throw new Html2TextException("Could not load HTML - badly formed?", $html);
 		}
 
@@ -161,10 +165,14 @@ class Html2Text {
 		return $nextName;
 	}
 
-	static function iterateOverNode($node) {
+	static function iterateOverNode($node, $in_pre = false) {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
-			return preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $node->wholeText);
+			if ($in_pre) {
+				return trim($node->wholeText, "\n\r\t ");
+			} else {
+				return preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $node->wholeText);
+			}
 		}
 		if ($node instanceof \DOMDocumentType) {
 			// ignore
@@ -231,7 +239,7 @@ class Html2Text {
 			for ($i = 0; $i < $node->childNodes->length; $i++) {
 				$n = $node->childNodes->item($i);
 
-				$text = static::iterateOverNode($n);
+				$text = static::iterateOverNode($n, $in_pre || $name == 'pre');
 
 				$output .= $text;
 			}
