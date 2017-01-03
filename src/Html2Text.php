@@ -28,13 +28,24 @@ class Html2Text {
 	 *   <li>Links are maintained, with the 'href' copied over
 	 *   <li>Information in the &lt;head&gt; is lost
 	 * </ul>
+	 * 
+	 * Options:
+	 * [
+	 * 	'link_open_bracket'  	=> '(',                
+	 * 	'link_close_bracket' 	=> ')',                
+	 * 	'name_open_bracket'  	=> '[',                
+	 * 	'name_close_bracket' 	=> ']',
+	 * 	'in_pre'				=> true/false
+	 * ];
 	 *
 	 * @param string $html the input HTML
-	 * @param boolean $ignore_error Ignore xml parsing errors
+	 * @param array $options	
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
 	 */
-	public static function convert($html, $ignore_error = false) {
+	public static function convert($html, array $options = []) {
+		// parse options
+		$ignore_error = (isset($options['ignore_error'])) ? $options['ignore_error'] : false;
 		// replace &nbsp; with spaces
 		$html = str_replace("&nbsp;", " ", $html);
 		$html = str_replace("\xc2\xa0", " ", $html);
@@ -62,7 +73,7 @@ class Html2Text {
 			$doc = static::fixMSEncoding($doc);
 		}
 
-		$output = static::iterateOverNode($doc);
+		$output = static::iterateOverNode($doc, $options);
 
 		// remove leading and trailing spaces on each line
 		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
@@ -165,7 +176,14 @@ class Html2Text {
 		return $nextName;
 	}
 
-	static function iterateOverNode($node, $in_pre = false) {
+	static function iterateOverNode($node, array $options = []) {
+		// Options
+		$link_open_bracket  = (isset($options['link_open_bracket'])) ? $options['link_open_bracket'] : '(';
+		$link_close_bracket = (isset($options['link_close_bracket'])) ? $options['link_close_bracket'] : ')';
+		$name_open_bracket  = (isset($options['name_open_bracket'])) ? $options['name_open_bracket'] : '[';
+		$name_close_bracket = (isset($options['name_close_bracket'])) ? $options['name_close_bracket'] : ']';
+		$in_pre             = (isset($options['in_pre'])) ? $options['in_pre'] : false;
+
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			if ($in_pre) {
@@ -238,8 +256,8 @@ class Html2Text {
 		if (isset($node->childNodes)) {
 			for ($i = 0; $i < $node->childNodes->length; $i++) {
 				$n = $node->childNodes->item($i);
-
-				$text = static::iterateOverNode($n, $in_pre || $name == 'pre');
+				if ($name == 'pre') $options['in_pre'] = true;
+				$text = static::iterateOverNode($n, $options);
 
 				$output .= $text;
 			}
@@ -293,7 +311,7 @@ class Html2Text {
 				if ($href == null) {
 					// it doesn't link anywhere
 					if ($node->getAttribute("name") != null) {
-						$output = "[$output]";
+						$output = $link_open_bracket . $output . $link_close_bracket;
 					}
 				} else {
 					if ($href == $output || $href == "mailto:$output" || $href == "http://$output" || $href == "https://$output") {
@@ -302,7 +320,7 @@ class Html2Text {
 					} else {
 						// replace it
 						if ($output) {
-							$output = "[$output]($href)";
+							$output = $name_open_bracket . $output . $name_close_bracket . $link_open_bracket . $href . $link_close_bracket;
 						} else {
 							// empty string
 							$output = $href;
@@ -320,9 +338,9 @@ class Html2Text {
 
 			case "img":
 				if ($node->getAttribute("title")) {
-					$output = "[" . $node->getAttribute("title") . "]";
+					$output = $name_open_bracket . $node->getAttribute("title") . $name_close_bracket;
 				} elseif ($node->getAttribute("alt")) {
-					$output = "[" . $node->getAttribute("alt") . "]";
+					$output = $name_open_bracket . $node->getAttribute("alt") . $name_close_bracket;
 				} else {
 					$output = "";
 				}
