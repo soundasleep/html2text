@@ -49,6 +49,11 @@ class Html2Text {
 			$html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
 		}
 
+		// DOMDocument doesn't support empty value and throws an error
+		if (!$html) {
+			return '';
+		}
+
 		$doc = new \DOMDocument();
 
 		if ($ignore_error) {
