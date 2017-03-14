@@ -54,27 +54,11 @@ class Html2Text {
 			return '';
 		}
 
-		$doc = new \DOMDocument();
-
-		if ($ignore_error) {
-			$doc->strictErrorChecking = false;
-			$doc->recover = true;
-			$doc->xmlStandalone = true;
-			$old_internal_errors = libxml_use_internal_errors(true);
-			$load_result = $doc->loadHTML($html, LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET);
-			libxml_use_internal_errors($old_internal_errors);
-		}
-		else {
-			$load_result = $doc->loadHTML($html);
-		}
-
-		if (!$load_result) {
-			throw new Html2TextException("Could not load HTML - badly formed?", $html);
-		}
+		$doc = static::getDocument($html, $ignore_error);
 
 		if (static::isOfficeDocument($html)) {
 			// remove office namespace
-			$doc = static::fixMSEncoding($doc);
+			$doc = static::fixMSEncoding($doc, $ignore_error);
 		}
 
 		$output = static::iterateOverNode($doc);
@@ -122,7 +106,7 @@ class Html2Text {
 	 * @param DOMDocument $doc the document to clean up
 	 * @return DOMDocument the modified document with less unnecessary paragraphs
 	 */
-	static function fixMSEncoding($doc) {
+	static function fixMSEncoding($doc, $ignore_error = false) {
 		$paras = $doc->getElementsByTagName('p');
 		for ($i = $paras->length - 1; $i >= 0; $i--) {
 			$para = $paras->item($i);
@@ -134,7 +118,35 @@ class Html2Text {
 			}
 		}
 
-		$doc->loadHTML($doc->saveHTML());
+		return static::getDocument($doc->saveHTML(), $ignore_error);
+	}
+
+	/**
+	 * Parse HTML into a DOMDocument
+	 *
+	 * @param string $html the input HTML
+	 * @param boolean $ignore_error Ignore xml parsing errors
+	 * @return DOMDocument the parsed document tree
+	 */
+	static function getDocument($html, $ignore_error = false) {
+
+		$doc = new \DOMDocument();
+
+		if ($ignore_error) {
+			$doc->strictErrorChecking = false;
+			$doc->recover = true;
+			$doc->xmlStandalone = true;
+			$old_internal_errors = libxml_use_internal_errors(true);
+			$load_result = $doc->loadHTML($html, LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET);
+			libxml_use_internal_errors($old_internal_errors);
+		}
+		else {
+			$load_result = $doc->loadHTML($html);
+		}
+
+		if (!$load_result) {
+			throw new Html2TextException("Could not load HTML - badly formed?", $html);
+		}
 
 		return $doc;
 	}
