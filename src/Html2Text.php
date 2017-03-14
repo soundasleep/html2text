@@ -240,12 +240,17 @@ class Html2Text {
 		//$output .= "[$name,$nextName]";
 
 		if (isset($node->childNodes)) {
-			for ($i = 0; $i < $node->childNodes->length; $i++) {
-				$n = $node->childNodes->item($i);
+
+			$n = $node->childNodes->item(0);
+
+			while($n != null) {
 
 				$text = static::iterateOverNode($n, $in_pre || $name == 'pre');
 
 				$output .= $text;
+
+				$node->removeChild($n);
+				$n = $node->childNodes->item(0);
 			}
 		}
 
