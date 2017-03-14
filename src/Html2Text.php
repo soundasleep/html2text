@@ -49,11 +49,6 @@ class Html2Text {
 			$html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
 		}
 
-		// DOMDocument doesn't support empty value and throws an error
-		if (!$html) {
-			return '';
-		}
-
 		$doc = static::getDocument($html, $ignore_error);
 
 		if (static::isOfficeDocument($html)) {
@@ -131,6 +126,12 @@ class Html2Text {
 	static function getDocument($html, $ignore_error = false) {
 
 		$doc = new \DOMDocument();
+
+		if (!$html) {
+			// DOMDocument doesn't support empty value and throws an error
+			// Return empty document instead
+			return $doc;
+		}
 
 		if ($ignore_error) {
 			$doc->strictErrorChecking = false;
