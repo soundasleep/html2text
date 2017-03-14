@@ -50,9 +50,19 @@ class Html2Text {
 		}
 
 		$doc = new \DOMDocument();
-		if ($ignore_error) $old_internal_errors = libxml_use_internal_errors(true);
-		$load_result = $doc->loadHTML($html);
-		if ($ignore_error) libxml_use_internal_errors($old_internal_errors);
+
+		if ($ignore_error) {
+			$doc->strictErrorChecking = false;
+			$doc->recover = true;
+			$doc->xmlStandalone = true;
+			$old_internal_errors = libxml_use_internal_errors(true);
+			$load_result = $doc->loadHTML($html, LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET);
+			libxml_use_internal_errors($old_internal_errors);
+		}
+		else {
+			$load_result = $doc->loadHTML($html);
+		}
+
 		if (!$load_result) {
 			throw new Html2TextException("Could not load HTML - badly formed?", $html);
 		}
