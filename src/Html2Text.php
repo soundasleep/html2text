@@ -178,6 +178,10 @@ class Html2Text {
 			// ignore
 			return "";
 		}
+		if ($node instanceof \DOMProcessingInstruction) {
+			// ignore
+			return "";
+		}
 
 		$nextName = static::nextChildName($node);
 		$prevName = static::prevChildName($node);
