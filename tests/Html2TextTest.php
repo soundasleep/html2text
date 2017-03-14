@@ -76,6 +76,14 @@ class Html2TextTest extends PHPUnit_Framework_TestCase {
 		$this->doTest("msoffice");
 	}
 
+	function testDOMProcessing() {
+		$this->doTest("dom-processing");
+	}
+
+	function testEmpty() {
+		$this->doTest("empty");
+	}
+
 	/**
      * @expectedException PHPUnit_Framework_Error_Warning
      */
