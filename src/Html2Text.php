@@ -39,7 +39,9 @@ class Html2Text {
 		$html = str_replace("&nbsp;", " ", $html);
 		$html = str_replace("\xc2\xa0", " ", $html);
 
-		if (static::isOfficeDocument($html)) {
+		$is_office_document = static::isOfficeDocument($html);
+
+		if ($is_office_document) {
 			// remove office namespace
 			$html = str_replace(array("<o:p>", "</o:p>"), "", $html);
 		}
@@ -51,12 +53,7 @@ class Html2Text {
 
 		$doc = static::getDocument($html, $ignore_error);
 
-		if (static::isOfficeDocument($html)) {
-			// remove office namespace
-			$doc = static::fixMSEncoding($doc, $ignore_error);
-		}
-
-		$output = static::iterateOverNode($doc);
+		$output = static::iterateOverNode($doc, false, $is_office_document);
 
 		// remove leading and trailing spaces on each line
 		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
@@ -86,34 +83,6 @@ class Html2Text {
 		$text = str_replace("\r", "\n", $text);
 
 		return $text;
-	}
-
-	/**
-	 * Microsoft exchange emails often include HTML which, when passed through
-	 * html2text, results in lots of double line returns everywhere.
-	 *
-	 * To fix this any element with a className of `msoNormal` (the standard
-	 * classname in any Microsoft export or outlook for a paragraph that behaves
-	 * like a line return) is changed to a line with a break `<br>` afterwards.
-	 *
-	 * This cleaned up document can then be processed as normal through Html2Text.
-	 *
-	 * @param DOMDocument $doc the document to clean up
-	 * @return DOMDocument the modified document with less unnecessary paragraphs
-	 */
-	static function fixMSEncoding($doc, $ignore_error = false) {
-		$paras = $doc->getElementsByTagName('p');
-		for ($i = $paras->length - 1; $i >= 0; $i--) {
-			$para = $paras->item($i);
-			if ($para->getAttribute('class') == 'MsoNormal') {
-				$fragment = $doc->createDocumentFragment();
-				$fragment->appendChild($doc->createTextNode($para->nodeValue));
-				$fragment->appendChild($doc->createElement('br'));
-				$new_node = $para->parentNode->replaceChild($fragment, $para);
-			}
-		}
-
-		return static::getDocument($doc->saveHTML(), $ignore_error);
 	}
 
 	/**
@@ -193,7 +162,7 @@ class Html2Text {
 		return $nextName;
 	}
 
-	static function iterateOverNode($node, $in_pre = false) {
+	static function iterateOverNode($node, $in_pre = false, $is_office_document = false) {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			if ($in_pre) {
@@ -249,6 +218,16 @@ class Html2Text {
 
 			case "tr":
 			case "p":
+				// Microsoft exchange emails often include HTML which, when passed through
+				// html2text, results in lots of double line returns everywhere.
+				//
+				// To fix this, for any p element with a className of `MsoNormal` (the standard
+				// classname in any Microsoft export or outlook for a paragraph that behaves
+				// like a line return) we skip the first line return.
+				if ($is_office_document && $node->getAttribute('class') == 'MsoNormal') {
+					$output = "";
+					break;
+				}
 			case "div":
 				// add one line
 				$output = "\n";
@@ -273,7 +252,7 @@ class Html2Text {
 
 			while($n != null) {
 
-				$text = static::iterateOverNode($n, $in_pre || $name == 'pre');
+				$text = static::iterateOverNode($n, $in_pre || $name == 'pre', $is_office_document);
 
 				$output .= $text;
 
