@@ -59,6 +59,9 @@ class Html2Text {
 		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
 		$output = preg_replace("/ *\t */im", "\t", $output);
 
+		// unarmor pre blocks
+		$output = str_replace("\r", "\n", $output);
+
 		// remove unnecessary empty lines
 		$output = preg_replace("/\n\n\n*/im", "\n\n", $output);
 
@@ -169,7 +172,11 @@ class Html2Text {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			if ($in_pre) {
-				return trim($node->wholeText, "\n\r\t ");
+				$text = "\n" . trim($node->wholeText, "\n\r\t ") . "\n";
+				// Remove trailing whitespace only
+				$text = preg_replace("/[ \t]*\n/im", "\n", $text);
+				// armor newlines with \r.
+				return str_replace("\n", "\r", $text);
 			} else {
 				$text = preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $node->wholeText);
 				if (!static::isWhitespace($text) && ($prevName == 'p' || $prevName == 'div')) {
@@ -237,11 +244,11 @@ class Html2Text {
 					$name = 'br';
 					break;
 				}
-			case "pre":
 				// add two lines
 				$output = "\n\n";
 				break;
 
+			case "pre":
 			case "tr":
 			case "div":
 				// add one line
@@ -306,11 +313,12 @@ class Html2Text {
 				$output .= "\n";
 				break;
 
-			case "pre":
 			case "p":
 				// add two lines
 				$output .= "\n\n";
 				break;
+
+			case "pre":
 			case "br":
 				// add one line
 				$output .= "\n";

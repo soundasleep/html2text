@@ -4,5 +4,5 @@ Here is the code
 #include <stdio.h>
 
 int main(){
-return 0;
+	return 0;
 };
