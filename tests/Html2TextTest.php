@@ -84,6 +84,10 @@ class Html2TextTest extends PHPUnit_Framework_TestCase {
 		$this->doTest("empty");
 	}
 
+	function testHugeMsoffice() {
+		$this->doTest("huge-msoffice");
+	}
+
 	/**
      * @expectedException PHPUnit_Framework_Error_Warning
      */

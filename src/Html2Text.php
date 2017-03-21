@@ -39,7 +39,9 @@ class Html2Text {
 		$html = str_replace("&nbsp;", " ", $html);
 		$html = str_replace("\xc2\xa0", " ", $html);
 
-		if (static::isOfficeDocument($html)) {
+		$is_office_document = static::isOfficeDocument($html);
+
+		if ($is_office_document) {
 			// remove office namespace
 			$html = str_replace(array("<o:p>", "</o:p>"), "", $html);
 		}
@@ -51,16 +53,14 @@ class Html2Text {
 
 		$doc = static::getDocument($html, $ignore_error);
 
-		if (static::isOfficeDocument($html)) {
-			// remove office namespace
-			$doc = static::fixMSEncoding($doc, $ignore_error);
-		}
-
-		$output = static::iterateOverNode($doc);
+		$output = static::iterateOverNode($doc, null, false, $is_office_document);
 
 		// remove leading and trailing spaces on each line
 		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
 		$output = preg_replace("/ *\t */im", "\t", $output);
+
+		// unarmor pre blocks
+		$output = str_replace("\r", "\n", $output);
 
 		// remove unnecessary empty lines
 		$output = preg_replace("/\n\n\n*/im", "\n\n", $output);
@@ -89,34 +89,6 @@ class Html2Text {
 	}
 
 	/**
-	 * Microsoft exchange emails often include HTML which, when passed through
-	 * html2text, results in lots of double line returns everywhere.
-	 *
-	 * To fix this any element with a className of `msoNormal` (the standard
-	 * classname in any Microsoft export or outlook for a paragraph that behaves
-	 * like a line return) is changed to a line with a break `<br>` afterwards.
-	 *
-	 * This cleaned up document can then be processed as normal through Html2Text.
-	 *
-	 * @param DOMDocument $doc the document to clean up
-	 * @return DOMDocument the modified document with less unnecessary paragraphs
-	 */
-	static function fixMSEncoding($doc, $ignore_error = false) {
-		$paras = $doc->getElementsByTagName('p');
-		for ($i = $paras->length - 1; $i >= 0; $i--) {
-			$para = $paras->item($i);
-			if ($para->getAttribute('class') == 'MsoNormal') {
-				$fragment = $doc->createDocumentFragment();
-				$fragment->appendChild($doc->createTextNode($para->nodeValue));
-				$fragment->appendChild($doc->createElement('br'));
-				$new_node = $para->parentNode->replaceChild($fragment, $para);
-			}
-		}
-
-		return static::getDocument($doc->saveHTML(), $ignore_error);
-	}
-
-	/**
 	 * Parse HTML into a DOMDocument
 	 *
 	 * @param string $html the input HTML
@@ -127,10 +99,20 @@ class Html2Text {
 
 		$doc = new \DOMDocument();
 
+		$html = trim($html);
+
 		if (!$html) {
 			// DOMDocument doesn't support empty value and throws an error
 			// Return empty document instead
 			return $doc;
+		}
+
+		if ($html[0] !== '<') {
+			// If HTML does not begin with a tag, we put a body tag around it.
+			// If we do not do this, PHP will insert a paragraph tag around
+			// the first block of text for some reason which can mess up
+			// the newlines. See pre.html test for an example.
+			$html = '<body>' . $html . '</body>';
 		}
 
 		if ($ignore_error) {
@@ -159,47 +141,48 @@ class Html2Text {
 		return strpos($html, "urn:schemas-microsoft-com:office") !== false;
 	}
 
+	static function isWhitespace($text) {
+		return strlen(trim($text, "\n\r\t ")) === 0;
+	}
+
 	static function nextChildName($node) {
 		// get the next child
 		$nextNode = $node->nextSibling;
 		while ($nextNode != null) {
+			if ($nextNode instanceof \DOMText) {
+				if (!static::isWhitespace($nextNode->wholeText)) {
+					break;
+				}
+			}
 			if ($nextNode instanceof \DOMElement) {
 				break;
 			}
 			$nextNode = $nextNode->nextSibling;
 		}
 		$nextName = null;
-		if ($nextNode instanceof \DOMElement && $nextNode != null) {
+		if (($nextNode instanceof \DOMElement || $nextNode instanceof \DOMText) && $nextNode != null) {
 			$nextName = strtolower($nextNode->nodeName);
 		}
 
 		return $nextName;
 	}
 
-	static function prevChildName($node) {
-		// get the previous child
-		$nextNode = $node->previousSibling;
-		while ($nextNode != null) {
-			if ($nextNode instanceof \DOMElement) {
-				break;
-			}
-			$nextNode = $nextNode->previousSibling;
-		}
-		$nextName = null;
-		if ($nextNode instanceof \DOMElement && $nextNode != null) {
-			$nextName = strtolower($nextNode->nodeName);
-		}
+	static function iterateOverNode($node, $prevName = null, $in_pre = false, $is_office_document = false) {
 
-		return $nextName;
-	}
-
-	static function iterateOverNode($node, $in_pre = false) {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			if ($in_pre) {
-				return trim($node->wholeText, "\n\r\t ");
+				$text = "\n" . trim($node->wholeText, "\n\r\t ") . "\n";
+				// Remove trailing whitespace only
+				$text = preg_replace("/[ \t]*\n/im", "\n", $text);
+				// armor newlines with \r.
+				return str_replace("\n", "\r", $text);
 			} else {
-				return preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $node->wholeText);
+				$text = preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $node->wholeText);
+				if (!static::isWhitespace($text) && ($prevName == 'p' || $prevName == 'div')) {
+					return "\n" . $text;
+				}
+				return $text;
 			}
 		}
 		if ($node instanceof \DOMDocumentType) {
@@ -211,15 +194,17 @@ class Html2Text {
 			return "";
 		}
 
-		$nextName = static::nextChildName($node);
-		$prevName = static::prevChildName($node);
-
 		$name = strtolower($node->nodeName);
+		$nextName = static::nextChildName($node);
 
 		// start whitespace
 		switch ($name) {
 			case "hr":
-				return "---------------------------------------------------------------\n";
+				$prefix = '';
+				if ($prevName != null) {
+					$prefix = "\n";
+				}
+				return $prefix . "---------------------------------------------------------------\n";
 
 			case "style":
 			case "head":
@@ -247,8 +232,24 @@ class Html2Text {
 			   $output = "\t";
 			   break;
 
-			case "tr":
 			case "p":
+				// Microsoft exchange emails often include HTML which, when passed through
+				// html2text, results in lots of double line returns everywhere.
+				//
+				// To fix this, for any p element with a className of `MsoNormal` (the standard
+				// classname in any Microsoft export or outlook for a paragraph that behaves
+				// like a line return) we skip the first line returns and set the name to br.
+				if ($is_office_document && $node->getAttribute('class') == 'MsoNormal') {
+					$output = "";
+					$name = 'br';
+					break;
+				}
+				// add two lines
+				$output = "\n\n";
+				break;
+
+			case "pre":
+			case "tr":
 			case "div":
 				// add one line
 				$output = "\n";
@@ -270,15 +271,29 @@ class Html2Text {
 		if (isset($node->childNodes)) {
 
 			$n = $node->childNodes->item(0);
+			$previousSiblingName = null;
 
 			while($n != null) {
 
-				$text = static::iterateOverNode($n, $in_pre || $name == 'pre');
+				$text = static::iterateOverNode($n, $previousSiblingName, $in_pre || $name == 'pre', $is_office_document);
 
-				$output .= $text;
+				// Pass current node name to next child, as previousSibling does not appear to get populated
+				if ($n instanceof \DOMDocumentType
+					|| $n instanceof \DOMProcessingInstruction
+					|| ($n instanceof \DOMText && static::isWhitespace($text))) {
+					// Keep current previousSiblingName, these are invisible
+				}
+				else {
+					$previousSiblingName = strtolower($n->nodeName);
+				}
 
 				$node->removeChild($n);
 				$n = $node->childNodes->item(0);
+
+				// suppress last br tag inside a node list
+				if ($n != null || $previousSiblingName != 'br') {
+					$output .= $text;
+				}
 			}
 		}
 
@@ -294,16 +309,17 @@ class Html2Text {
 				break;
 
 			case "p":
+				// add two lines
+				$output .= "\n\n";
+				break;
+
+			case "pre":
 			case "br":
 				// add one line
-				if ($nextName != "div")
-					$output .= "\n";
+				$output .= "\n";
 				break;
 
 			case "div":
-				// add one line only if the next child isn't a div
-				if ($nextName != "div" && $nextName != null)
-					$output .= "\n";
 				break;
 
 			case "a":
@@ -375,5 +391,4 @@ class Html2Text {
 
 		return $output;
 	}
-
 }
