@@ -56,11 +56,10 @@ class Html2Text {
 		$output = static::iterateOverNode($doc, null, false, $is_office_document);
 
 		// remove leading and trailing spaces on each line
-		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
-		$output = preg_replace("/ *\t */im", "\t", $output);
+		$output = static::trimSpaces($output);
 
 		// unarmor pre blocks
-		$output = str_replace("\r", "\n", $output);
+		$output = static::fixNewLines($output);
 
 		// remove unnecessary empty lines
 		$output = preg_replace("/\n\n\n*/im", "\n\n", $output);
@@ -84,6 +83,20 @@ class Html2Text {
 		$text = str_replace("\r\n", "\n", $text);
 		// remove \rs
 		$text = str_replace("\r", "\n", $text);
+
+		return $text;
+	}
+
+	/**
+	 * Remove leading or trailing spaces from provided multiline text
+	 *
+	 * @param string $text multiline text any number of leading or trailing spaces
+	 * @return string the fixed text
+	 */
+	static function trimSpaces($text) {
+
+		$text = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $text);
+		$text = preg_replace("/ *\t */im", "\t", $text);
 
 		return $text;
 	}
@@ -308,12 +321,12 @@ class Html2Text {
 				$output .= "\n";
 				break;
 
+			case "pre":
 			case "p":
 				// add two lines
 				$output .= "\n\n";
 				break;
 
-			case "pre":
 			case "br":
 				// add one line
 				$output .= "\n";
@@ -385,6 +398,26 @@ class Html2Text {
 				$output .= "\n";
 				break;
 
+			case "blockquote":
+
+				// remove leading and trailing spaces on each line
+				$output = static::trimSpaces($output);
+
+				// unarmor pre blocks
+				$output = static::fixNewLines($output);
+
+				// trim text, add leading newline
+				$output = "\n" . trim($output);
+
+				// prepend '> ' at the beginning of all lines
+				$output = preg_replace("/\n/im", "\n> ", $output);
+
+				// replace leading '> >' with '>>'
+				$output = preg_replace("/\n> >/im", "\n>>", $output);
+
+				// add trailing newline
+				$output .= "\n";
+				break;
 			default:
 				// do nothing
 		}
