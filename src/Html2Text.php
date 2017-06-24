@@ -55,18 +55,8 @@ class Html2Text {
 
 		$output = static::iterateOverNode($doc, null, false, $is_office_document);
 
-		// remove leading and trailing spaces on each line
-		$output = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $output);
-		$output = preg_replace("/ *\t */im", "\t", $output);
-
-		// unarmor pre blocks
-		$output = str_replace("\r", "\n", $output);
-
-		// remove unnecessary empty lines
-		$output = preg_replace("/\n\n\n*/im", "\n\n", $output);
-
-		// remove leading and trailing whitespace
-		$output = trim($output);
+		// process output for whitespace/newlines
+		$output = static::processWhitespaceNewlines($output);
 
 		return $output;
 	}
@@ -84,6 +74,29 @@ class Html2Text {
 		$text = str_replace("\r\n", "\n", $text);
 		// remove \rs
 		$text = str_replace("\r", "\n", $text);
+
+		return $text;
+	}
+
+	/**
+	 * Remove leading or trailing spaces and excess empty lines from provided multiline text
+	 *
+	 * @param string $text multiline text any number of leading or trailing spaces or excess lines
+	 * @return string the fixed text
+	 */
+	static function processWhitespaceNewlines($text) {
+		// remove leading and trailing spaces on each line
+		$text = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $text);
+		$text = preg_replace("/ *\t */im", "\t", $text);
+
+		// unarmor pre blocks
+		$text = static::fixNewLines($text);
+
+		// remove unnecessary empty lines
+		$text = preg_replace("/\n\n\n*/im", "\n\n", $text);
+
+		// remove leading and trailing whitespace
+		$text = trim($text);
 
 		return $text;
 	}
@@ -222,8 +235,9 @@ class Html2Text {
 			case "h6":
 			case "ol":
 			case "ul":
-				// add two newlines, second line is added below
-				$output = "\n";
+			case "pre":
+				// add two newlines
+				$output = "\n\n";
 				break;
 
 			case "td":
@@ -248,7 +262,6 @@ class Html2Text {
 				$output = "\n\n";
 				break;
 
-			case "pre":
 			case "tr":
 			case "div":
 				// add one line
@@ -305,21 +318,20 @@ class Html2Text {
 			case "h4":
 			case "h5":
 			case "h6":
-				$output .= "\n";
-				break;
-
+			case "pre":
 			case "p":
 				// add two lines
 				$output .= "\n\n";
 				break;
 
-			case "pre":
 			case "br":
 				// add one line
 				$output .= "\n";
 				break;
 
 			case "div":
+				// trim trailing newlines
+				$output = rtrim($output);
 				break;
 
 			case "a":
@@ -385,6 +397,22 @@ class Html2Text {
 				$output .= "\n";
 				break;
 
+			case "blockquote":
+				// process quoted text for whitespace/newlines
+				$output = static::processWhitespaceNewlines($output);
+
+				// add leading newline
+				$output = "\n" . $output;
+
+				// prepend '> ' at the beginning of all lines
+				$output = preg_replace("/\n/im", "\n> ", $output);
+
+				// replace leading '> >' with '>>'
+				$output = preg_replace("/\n> >/im", "\n>>", $output);
+
+				// add another leading newline and trailing newlines
+				$output = "\n" . $output . "\n\n";
+				break;
 			default:
 				// do nothing
 		}

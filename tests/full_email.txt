@@ -29,7 +29,6 @@ One type of cat is a kitten.
 Special account  A1
 
 12.345
-
 http://localhost/logout
 
 How can you find more cats?

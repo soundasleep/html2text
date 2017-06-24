@@ -52,6 +52,14 @@ class Html2TextTest extends PHPUnit_Framework_TestCase {
 		$this->doTest("pre");
 	}
 
+	function testNewLines() {
+		$this->doTest("newlines");
+	}
+
+	function testBlockQuotes() {
+		$this->doTest("blockquotes");
+	}
+
 	function testFullEmail() {
 		$this->doTest("full_email");
 	}
