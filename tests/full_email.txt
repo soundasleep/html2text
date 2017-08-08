@@ -6,7 +6,6 @@ Hi Susan
 Here is your cat report.
 
 You have found 5 cats less than anyone else
-
 [Find more cats](http://localhost/cats)
 
 Down the road
@@ -29,6 +28,7 @@ One type of cat is a kitten.
 Special account  A1
 
 12.345
+
 http://localhost/logout
 
 How can you find more cats?

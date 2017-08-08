@@ -263,9 +263,15 @@ class Html2Text {
 				break;
 
 			case "tr":
-			case "div":
 				// add one line
 				$output = "\n";
+				break;
+			case "div":
+				$output = "";
+				if ($prevName !== null) {
+					// add one line
+					$output .= "\n";
+				}
 				break;
 
 			case "li":
@@ -286,6 +292,9 @@ class Html2Text {
 			$n = $node->childNodes->item(0);
 			$previousSiblingName = null;
 
+			$parts = array();
+			$trailing_whitespace = 0;
+
 			while($n != null) {
 
 				$text = static::iterateOverNode($n, $previousSiblingName, $in_pre || $name == 'pre', $is_office_document);
@@ -295,19 +304,30 @@ class Html2Text {
 					|| $n instanceof \DOMProcessingInstruction
 					|| ($n instanceof \DOMText && static::isWhitespace($text))) {
 					// Keep current previousSiblingName, these are invisible
+					$trailing_whitespace++;
 				}
 				else {
 					$previousSiblingName = strtolower($n->nodeName);
+					$trailing_whitespace = 0;
 				}
 
 				$node->removeChild($n);
 				$n = $node->childNodes->item(0);
 
-				// suppress last br tag inside a node list
-				if ($n != null || $previousSiblingName != 'br') {
-					$output .= $text;
-				}
+				$parts[] = $text;
 			}
+
+			// Remove trailing whitespace, important for the br check below
+			while($trailing_whitespace-- !== 0) {
+				array_pop($parts);
+			}
+
+			// suppress last br tag inside a node list
+			if ($previousSiblingName == 'br') {
+				array_pop($parts);
+			}
+
+			$output .= implode('', $parts);
 		}
 
 		// end whitespace
@@ -330,8 +350,6 @@ class Html2Text {
 				break;
 
 			case "div":
-				// trim trailing newlines
-				$output = rtrim($output);
 				break;
 
 			case "a":
