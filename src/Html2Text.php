@@ -35,9 +35,6 @@ class Html2Text {
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link DOMDocument}
 	 */
 	public static function convert($html, $ignore_error = false) {
-		// replace &nbsp; with spaces
-		$html = str_replace("&nbsp;", " ", $html);
-		$html = str_replace("\xc2\xa0", " ", $html);
 
 		$is_office_document = static::isOfficeDocument($html);
 
@@ -85,18 +82,32 @@ class Html2Text {
 	 * @return string the fixed text
 	 */
 	static function processWhitespaceNewlines($text) {
-		// remove leading and trailing spaces on each line
-		$text = preg_replace("/[ \t]*\n[ \t]*/im", "\n", $text);
+
+		// remove excess spaces around tabs
 		$text = preg_replace("/ *\t */im", "\t", $text);
+
+		// remove leading whitespace
+		$text = ltrim($text);
+
+		// remove leading spaces on each line
+		$text = preg_replace("/\n[ \t]*/im", "\n", $text);
+
+		// convert non-breaking spaces to regular spaces to prevent output issues,
+		// do it here so they do NOT get removed with other leading spaces, as they
+		// are sometimes used for indentation
+		$text = str_replace("\xc2\xa0", " ", $text);
+
+		// remove trailing whitespace
+		$text = rtrim($text);
+
+		// remove trailing spaces on each line
+		$text = preg_replace("/[ \t]*\n/im", "\n", $text);
 
 		// unarmor pre blocks
 		$text = static::fixNewLines($text);
 
 		// remove unnecessary empty lines
 		$text = preg_replace("/\n\n\n*/im", "\n\n", $text);
-
-		// remove leading and trailing whitespace
-		$text = trim($text);
 
 		return $text;
 	}
