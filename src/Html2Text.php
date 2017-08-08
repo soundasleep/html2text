@@ -290,6 +290,7 @@ class Html2Text {
 		if (isset($node->childNodes)) {
 
 			$n = $node->childNodes->item(0);
+			$previousSiblingNames = array();
 			$previousSiblingName = null;
 
 			$parts = array();
@@ -308,6 +309,7 @@ class Html2Text {
 				}
 				else {
 					$previousSiblingName = strtolower($n->nodeName);
+					$previousSiblingNames[] = $previousSiblingName;
 					$trailing_whitespace = 0;
 				}
 
@@ -322,9 +324,13 @@ class Html2Text {
 				array_pop($parts);
 			}
 
-			// suppress last br tag inside a node list
-			if ($previousSiblingName == 'br') {
-				array_pop($parts);
+			// suppress last br tag inside a node list if follows text
+			$last_name = array_pop($previousSiblingNames);
+			if ($last_name === 'br') {
+				$last_name = array_pop($previousSiblingNames);
+				if ($last_name === '#text') {
+					array_pop($parts);
+				}
 			}
 
 			$output .= implode('', $parts);
