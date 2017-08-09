@@ -277,6 +277,7 @@ class Html2Text {
 				// add one line
 				$output = "\n";
 				break;
+
 			case "div":
 				$output = "";
 				if ($prevName !== null) {
@@ -331,7 +332,7 @@ class Html2Text {
 			}
 
 			// Remove trailing whitespace, important for the br check below
-			while($trailing_whitespace-- !== 0) {
+			while($trailing_whitespace-- > 0) {
 				array_pop($parts);
 			}
 

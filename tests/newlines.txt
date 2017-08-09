@@ -7,15 +7,6 @@ How are you?
 
 Just two divs
 Hanging out
-Nested divs and line breaks
-
-Nested divs and line breaks
-More text
-
-Just text
-Just text
-Just text
-
 This is not the end!
 How are you again?
 This is the end!
