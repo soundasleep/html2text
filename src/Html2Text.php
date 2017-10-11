@@ -144,7 +144,7 @@ class Html2Text {
 			$doc->recover = true;
 			$doc->xmlStandalone = true;
 			$old_internal_errors = libxml_use_internal_errors(true);
-			$load_result = $doc->loadHTML($html, LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET);
+			$load_result = $doc->loadHTML($html, LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET | LIBXML_PARSEHUGE);
 			libxml_use_internal_errors($old_internal_errors);
 		}
 		else {
