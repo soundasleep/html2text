@@ -66,6 +66,12 @@ You can also include the supplied `html2text.php` and use `$text = convert_html_
 
 Some very basic tests are provided in the `tests/` directory. Run them with `composer install --dev && vendor/bin/phpunit`.
 
+## Troubleshooting
+
+### Class 'DOMDocument' not found
+
+You need to [install the PHP XML extension](https://github.com/soundasleep/html2text/issues/55) for your PHP version. e.g. `apt-get install php7.1-xml`
+
 ## License
 
 `html2text` is dual licensed under both [EPL v1.0](https://www.eclipse.org/legal/epl-v10.html) and [LGPL v3.0](http://www.gnu.org/licenses/lgpl.html), making it suitable for both Eclipse and GPL projects.
