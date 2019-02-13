@@ -60,6 +60,13 @@ class Html2Text {
 		return $text;
 	}
 
+	static function nbspCodes() {
+		return array(
+			"\xc2\xa0",
+			"\u00a0",
+		);
+	}
+
 	/**
 	 * Remove leading or trailing spaces and excess empty lines from provided multiline text
 	 *
@@ -80,7 +87,7 @@ class Html2Text {
 		// convert non-breaking spaces to regular spaces to prevent output issues,
 		// do it here so they do NOT get removed with other leading spaces, as they
 		// are sometimes used for indentation
-		$text = str_replace("\xc2\xa0", " ", $text);
+		$text = str_replace(static::nbspCodes(), " ", $text);
 
 		// remove trailing whitespace
 		$text = rtrim($text);
@@ -151,7 +158,7 @@ class Html2Text {
 	}
 
 	static function isWhitespace($text) {
-		return strlen(trim($text, "\n\r\t ")) === 0;
+		return strlen(trim(str_replace(static::nbspCodes(), " ", $text), "\n\r\t ")) === 0;
 	}
 
 	static function nextChildName($node) {
@@ -163,11 +170,14 @@ class Html2Text {
 					break;
 				}
 			}
+
 			if ($nextNode instanceof \DOMElement) {
 				break;
 			}
+
 			$nextNode = $nextNode->nextSibling;
 		}
+
 		$nextName = null;
 		if (($nextNode instanceof \DOMElement || $nextNode instanceof \DOMText) && $nextNode != null) {
 			$nextName = strtolower($nextNode->nodeName);
@@ -177,28 +187,29 @@ class Html2Text {
 	}
 
 	static function iterateOverNode($node, $prevName = null, $in_pre = false, $is_office_document = false) {
-
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			if ($in_pre) {
-				$text = "\n" . trim($node->wholeText, "\n\r\t ") . "\n";
+				$text = "\n" . trim(str_replace(static::nbspCodes(), " ", $node->wholeText), "\n\r\t ") . "\n";
+
 				// Remove trailing whitespace only
 				$text = preg_replace("/[ \t]*\n/im", "\n", $text);
+
 				// armor newlines with \r.
 				return str_replace("\n", "\r", $text);
+
 			} else {
-				$text = preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $node->wholeText);
+				$text = str_replace(static::nbspCodes(), " ", $node->wholeText);
+				$text = preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $text);
+
 				if (!static::isWhitespace($text) && ($prevName == 'p' || $prevName == 'div')) {
 					return "\n" . $text;
 				}
 				return $text;
 			}
 		}
-		if ($node instanceof \DOMDocumentType) {
-			// ignore
-			return "";
-		}
-		if ($node instanceof \DOMProcessingInstruction) {
+
+		if ($node instanceof \DOMDocumentType || $node instanceof \DOMProcessingInstruction) {
 			// ignore
 			return "";
 		}
@@ -254,6 +265,7 @@ class Html2Text {
 					$name = 'br';
 					break;
 				}
+
 				// add two lines
 				$output = "\n\n";
 				break;
@@ -293,7 +305,7 @@ class Html2Text {
 			$parts = array();
 			$trailing_whitespace = 0;
 
-			while($n != null) {
+			while ($n != null) {
 
 				$text = static::iterateOverNode($n, $previousSiblingName, $in_pre || $name == 'pre', $is_office_document);
 
@@ -317,7 +329,7 @@ class Html2Text {
 			}
 
 			// Remove trailing whitespace, important for the br check below
-			while($trailing_whitespace-- > 0) {
+			while ($trailing_whitespace-- > 0) {
 				array_pop($parts);
 			}
 
