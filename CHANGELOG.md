@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimise/improve newline & whitespace handling [#47](https://github.com/soundasleep/html2text/pull/47)
 - Upgrade PHP support to PHP 7.3+
 - Upgrade PHPUnit to 7.x
+- Re-release project under MIT license [#58](https://github.com/soundasleep/html2text/issues/58)
 
 ## [0.5.0] - 2017-04-20
 ### Added

@@ -74,7 +74,7 @@ You need to [install the PHP XML extension](https://github.com/soundasleep/html2
 
 ## License
 
-`html2text` is dual licensed under both [EPL v1.0](https://www.eclipse.org/legal/epl-v10.html) and [LGPL v3.0](http://www.gnu.org/licenses/lgpl.html), making it suitable for both Eclipse and GPL projects.
+`html2text` is [licensed under MIT](LICENSE.md), making it suitable for both Eclipse and GPL projects.
 
 ## Other versions
 

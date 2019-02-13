@@ -4,7 +4,7 @@
   "type": "library",
   "keywords": [ "php", "html", "text", "email" ],
   "homepage": "https://github.com/soundasleep/html2text",
-  "license": "EPL-1.0",
+  "license": "MIT",
   "authors": [
     {
       "name": "Jevon Wright",
