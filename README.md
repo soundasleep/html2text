@@ -64,6 +64,22 @@ $text = \Soundasleep\Html2Text::convert($html);
 
 You can also include the supplied `html2text.php` and use `$text = convert_html_to_text($html);` instead.
 
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| **ignore_errors** | `false` |Set to `true` to ignore any XML parsing errors. |
+
+Pass along options as a second argument to `convert`, for example:
+
+```php
+$options = array(
+  'ignore_errors' => true,
+  // other options go here
+);
+$text = \Soundasleep\Html2Text::convert($html, $options);
+```
+
 ## Tests
 
 Some very basic tests are provided in the `tests/` directory. Run them with `composer install && vendor/bin/phpunit`.

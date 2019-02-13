@@ -4,6 +4,12 @@ namespace Soundasleep;
 
 class Html2Text {
 
+	public static function defaultOptions() {
+		return array(
+			'ignore_errors' => false,
+		);
+	}
+
 	/**
 	 * Tries to convert the given HTML into a plain text format - best suited for
 	 * e-mail display, etc.
@@ -19,7 +25,21 @@ class Html2Text {
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link \DOMDocument}
 	 */
-	public static function convert($html, $ignore_error = false) {
+	public static function convert($html, $options = array()) {
+
+		if ($options === false || $options === true) {
+			// Using old style (< 1.0) of passing in options
+			throw new \InvalidArgumentException("html2text 1.x: Options must be passed in as an array, not as a boolean.");
+		}
+
+		$options = array_merge(static::defaultOptions(), $options);
+
+		// check all options are valid
+		foreach ($options as $key => $value) {
+			if (!in_array($key, array_keys(static::defaultOptions()))) {
+				throw new \InvalidArgumentException("Unknown html2text option '$key'");
+			}
+		}
 
 		$is_office_document = static::isOfficeDocument($html);
 
@@ -33,7 +53,7 @@ class Html2Text {
 			$html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
 		}
 
-		$doc = static::getDocument($html, $ignore_error);
+		$doc = static::getDocument($html, $options['ignore_errors']);
 
 		$output = static::iterateOverNode($doc, null, false, $is_office_document);
 
