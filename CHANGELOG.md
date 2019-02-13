@@ -5,7 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.0] - TBC
 ### Changed
+- **Important:** Changed namespace from `\Html2Text\Html2Text` to `\Soundasleep\Html2text` [#45](https://github.com/soundasleep/html2text/issues/45)
 - Convert non-breaking spaces to regular spaces to prevent output issues
 - Optimise/improve newline & whitespace handling [#47](https://github.com/soundasleep/html2text/pull/47)
 - Upgrade PHP support to PHP 7.3+

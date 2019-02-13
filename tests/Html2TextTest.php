@@ -1,14 +1,16 @@
 <?php
 
+require(__DIR__ . "/../src/Html2Text.php");
+
 class Html2TextTest extends \PHPUnit\Framework\TestCase {
 
 	function doTest($test, $ignoreXmlError = false) {
 		$this->assertTrue(file_exists(__DIR__ . "/$test.html"), "File '$test.html' did not exist");
 		$this->assertTrue(file_exists(__DIR__ . "/$test.txt"), "File '$test.txt' did not exist");
 		$input = file_get_contents(__DIR__ . "/$test.html");
-		$expected = Html2Text\Html2Text::fixNewlines(file_get_contents(__DIR__ . "/$test.txt"));
+		$expected = \Soundasleep\Html2Text::fixNewlines(file_get_contents(__DIR__ . "/$test.txt"));
 
-		$output = Html2Text\Html2Text::convert($input, $ignoreXmlError);
+		$output = \Soundasleep\Html2Text::convert($input, $ignoreXmlError);
 
 		if ($output != $expected) {
 			file_put_contents(__DIR__ . "/$test.output", $output);
@@ -110,4 +112,5 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 	function testInvalidXMLIgnore() {
 		$this->doTest("invalid", true);
 	}
+
 }

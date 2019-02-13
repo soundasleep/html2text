@@ -18,4 +18,4 @@ $input = file_get_contents($argv[1]);
 require_once(__DIR__ . "/src/Html2Text.php");
 require_once(__DIR__ . "/src/Html2TextException.php");
 
-echo Html2Text\Html2Text::convert($input);
+echo \Soundasleep\Html2Text::convert($input);

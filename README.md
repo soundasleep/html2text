@@ -49,7 +49,7 @@ You can use [Composer](http://getcomposer.org/) to add the [package](https://pac
 ```json
 {
   "require": {
-    "soundasleep/html2text": "~0.5"
+    "soundasleep/html2text": "~1.0"
   }
 }
 ```
@@ -57,7 +57,7 @@ You can use [Composer](http://getcomposer.org/) to add the [package](https://pac
 And then use it quite simply:
 
 ```php
-$text = Html2Text\Html2Text::convert($html);
+$text = \Soundasleep\Html2Text::convert($html);
 ```
 
 You can also include the supplied `html2text.php` and use `$text = convert_html_to_text($html);` instead.
