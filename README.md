@@ -64,7 +64,7 @@ You can also include the supplied `html2text.php` and use `$text = convert_html_
 
 ## Tests
 
-Some very basic tests are provided in the `tests/` directory. Run them with `composer install --dev && vendor/bin/phpunit`.
+Some very basic tests are provided in the `tests/` directory. Run them with `composer install && vendor/bin/phpunit`.
 
 ## Troubleshooting
 
