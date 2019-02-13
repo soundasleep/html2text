@@ -1,6 +1,6 @@
 <?php
 
-class Html2TextTest extends PHPUnit_Framework_TestCase {
+class Html2TextTest extends \PHPUnit\Framework\TestCase {
 
 	function doTest($test, $ignoreXmlError = false) {
 		$this->assertTrue(file_exists(__DIR__ . "/$test.html"), "File '$test.html' did not exist");
@@ -101,7 +101,7 @@ class Html2TextTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-     * @expectedException PHPUnit_Framework_Error_Warning
+     * @expectedException PHPUnit\Framework\Error\Warning
      */
 	function testInvalidXML() {
 		$this->doTest("invalid", false);
