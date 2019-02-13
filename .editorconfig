@@ -12,8 +12,8 @@ trim_trailing_whitespace = true
 indent_style = tab
 indent_size = 4
 
+# don't add newlines to test files
 [spec/examples/*]
 indent_style = tabs
 trim_trailing_whitespace = false
 insert_final_newline = false
-
