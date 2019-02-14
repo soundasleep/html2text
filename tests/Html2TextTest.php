@@ -5,15 +5,19 @@ require(__DIR__ . "/../src/Html2Text.php");
 class Html2TextTest extends \PHPUnit\Framework\TestCase {
 
 	function doTest($test, $options = array()) {
+		return $this->doTestWithResults($test, $test, $options);
+	}
+
+	function doTestWithResults($test, $result, $options = array()) {
 		$this->assertTrue(file_exists(__DIR__ . "/$test.html"), "File '$test.html' did not exist");
-		$this->assertTrue(file_exists(__DIR__ . "/$test.txt"), "File '$test.txt' did not exist");
+		$this->assertTrue(file_exists(__DIR__ . "/$result.txt"), "File '$result.txt' did not exist");
 		$input = file_get_contents(__DIR__ . "/$test.html");
-		$expected = \Soundasleep\Html2Text::fixNewlines(file_get_contents(__DIR__ . "/$test.txt"));
+		$expected = \Soundasleep\Html2Text::fixNewlines(file_get_contents(__DIR__ . "/$result.txt"));
 
 		$output = \Soundasleep\Html2Text::convert($input, $options);
 
 		if ($output != $expected) {
-			file_put_contents(__DIR__ . "/$test.output", $output);
+			file_put_contents(__DIR__ . "/$result.output", $output);
 		}
 		$this->assertEquals($output, $expected);
 	}
@@ -125,6 +129,14 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testInvalidOption() {
 		$this->doTest("basic", array('invalid_option' => true));
+	}
+
+	function testBasicDropLinks() {
+		$this->doTestWithResults("basic", "basic.no-links", array('drop_links' => true));
+	}
+
+	function testAnchorsDropLinks() {
+		$this->doTestWithResults("anchors", "anchors.no-links", array('drop_links' => true));
 	}
 
 }

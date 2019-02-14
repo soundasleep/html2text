@@ -7,6 +7,7 @@ class Html2Text {
 	public static function defaultOptions() {
 		return array(
 			'ignore_errors' => false,
+			'drop_links'    => false,
 		);
 	}
 
@@ -55,7 +56,7 @@ class Html2Text {
 
 		$doc = static::getDocument($html, $options['ignore_errors']);
 
-		$output = static::iterateOverNode($doc, null, false, $is_office_document);
+		$output = static::iterateOverNode($doc, null, false, $is_office_document, $options);
 
 		// process output for whitespace/newlines
 		$output = static::processWhitespaceNewlines($output);
@@ -206,7 +207,7 @@ class Html2Text {
 		return $nextName;
 	}
 
-	static function iterateOverNode($node, $prevName = null, $in_pre = false, $is_office_document = false) {
+	static function iterateOverNode($node, $prevName = null, $in_pre = false, $is_office_document = false, $options) {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			if ($in_pre) {
@@ -327,7 +328,7 @@ class Html2Text {
 
 			while ($n != null) {
 
-				$text = static::iterateOverNode($n, $previousSiblingName, $in_pre || $name == 'pre', $is_office_document);
+				$text = static::iterateOverNode($n, $previousSiblingName, $in_pre || $name == 'pre', $is_office_document, $options);
 
 				// Pass current node name to next child, as previousSibling does not appear to get populated
 				if ($n instanceof \DOMDocumentType
@@ -411,19 +412,27 @@ class Html2Text {
 				if ($href == null) {
 					// it doesn't link anywhere
 					if ($node->getAttribute("name") != null) {
-						$output = "[$output]";
+						if ($options['drop_links']) {
+							$output = "$output";
+						} else {
+							$output = "[$output]";
+						}
 					}
 				} else {
 					if ($href == $output || $href == "mailto:$output" || $href == "http://$output" || $href == "https://$output") {
 						// link to the same address: just use link
-						$output;
+						$output = "$output";
 					} else {
 						// replace it
 						if ($output) {
-							$output = "[$output]($href)";
+							if ($options['drop_links']) {
+								$output = "$output";
+							} else {
+								$output = "[$output]($href)";
+							}
 						} else {
 							// empty string
-							$output = $href;
+							$output = "$href";
 						}
 					}
 				}

@@ -68,7 +68,8 @@ You can also include the supplied `html2text.php` and use `$text = convert_html_
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| **ignore_errors** | `false` |Set to `true` to ignore any XML parsing errors. |
+| **ignore_errors** | `false` | Set to `true` to ignore any XML parsing errors. |
+| **drop_links** | `false` | Set to `true` to not render links as `[http://foo.com](My Link)`, but rather just `My Link`. |
 
 Pass along options as a second argument to `convert`, for example:
 
