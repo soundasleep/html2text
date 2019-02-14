@@ -4,16 +4,20 @@ require(__DIR__ . "/../src/Html2Text.php");
 
 class Html2TextTest extends \PHPUnit\Framework\TestCase {
 
-	function doTest($test, $ignoreXmlError = false) {
-		$this->assertTrue(file_exists(__DIR__ . "/$test.html"), "File '$test.html' did not exist");
-		$this->assertTrue(file_exists(__DIR__ . "/$test.txt"), "File '$test.txt' did not exist");
-		$input = file_get_contents(__DIR__ . "/$test.html");
-		$expected = \Soundasleep\Html2Text::fixNewlines(file_get_contents(__DIR__ . "/$test.txt"));
+	function doTest($test, $options = array()) {
+		return $this->doTestWithResults($test, $test, $options);
+	}
 
-		$output = \Soundasleep\Html2Text::convert($input, $ignoreXmlError);
+	function doTestWithResults($test, $result, $options = array()) {
+		$this->assertTrue(file_exists(__DIR__ . "/$test.html"), "File '$test.html' did not exist");
+		$this->assertTrue(file_exists(__DIR__ . "/$result.txt"), "File '$result.txt' did not exist");
+		$input = file_get_contents(__DIR__ . "/$test.html");
+		$expected = \Soundasleep\Html2Text::fixNewlines(file_get_contents(__DIR__ . "/$result.txt"));
+
+		$output = \Soundasleep\Html2Text::convert($input, $options);
 
 		if ($output != $expected) {
-			file_put_contents(__DIR__ . "/$test.output", $output);
+			file_put_contents(__DIR__ . "/$result.output", $output);
 		}
 		$this->assertEquals($output, $expected);
 	}
@@ -103,14 +107,34 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-     * @expectedException PHPUnit\Framework\Error\Warning
-     */
+	 * @expectedException PHPUnit\Framework\Error\Warning
+	 */
 	function testInvalidXML() {
-		$this->doTest("invalid", false);
+		$this->doTest("invalid", array('ignore_errors' => false));
 	}
 
 	function testInvalidXMLIgnore() {
+		$this->doTest("invalid", array('ignore_errors' => true));
+	}
+
+	function testInvalidXMLIgnoreOldSyntax() {
+		// for BC, allow old #convert(text, bool) syntax
 		$this->doTest("invalid", true);
+	}
+
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
+	function testInvalidOption() {
+		$this->doTest("basic", array('invalid_option' => true));
+	}
+
+	function testBasicDropLinks() {
+		$this->doTestWithResults("basic", "basic.no-links", array('drop_links' => true));
+	}
+
+	function testAnchorsDropLinks() {
+		$this->doTestWithResults("anchors", "anchors.no-links", array('drop_links' => true));
 	}
 
 }
