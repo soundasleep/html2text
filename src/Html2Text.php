@@ -30,7 +30,7 @@ class Html2Text {
 
 		if ($options === false || $options === true) {
 			// Using old style (< 1.0) of passing in options
-			throw new \InvalidArgumentException("html2text 1.x: Options must be passed in as an array, not as a boolean.");
+			$options = array('ignore_errors' => $options);
 		}
 
 		$options = array_merge(static::defaultOptions(), $options);

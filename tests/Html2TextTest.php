@@ -117,10 +117,8 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 		$this->doTest("invalid", array('ignore_errors' => true));
 	}
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	function testInvalidXMLIgnoreOldSyntax() {
+		// for BC, allow old #convert(text, bool) syntax
 		$this->doTest("invalid", true);
 	}
 
