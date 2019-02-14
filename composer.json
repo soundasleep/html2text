@@ -14,7 +14,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Html2Text\\": "src"
+      "Soundasleep\\": "src"
     }
   },
   "support": {
