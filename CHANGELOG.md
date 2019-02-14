@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.0] - TBC
+## [1.0.0] - 2019-02-14
 ### Added
 - Added `drop_links` option to render links without the target href [#65](https://github.com/soundasleep/html2text/pull/65)
 
@@ -24,5 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add ignore_error optional argument [#63](https://github.com/soundasleep/html2text/pull/63)
 - Blockquote support [#50](https://github.com/soundasleep/html2text/pull/50)
 
-[Unreleased]: https://github.com/soundasleep/html2text/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/soundasleep/html2text/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/soundasleep/html2text/compare/0.5.0...1.0.0
 [0.5.0]: https://github.com/soundasleep/html2text/compare/0.5.0...0.3.4
