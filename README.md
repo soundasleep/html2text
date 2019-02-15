@@ -52,7 +52,7 @@ You can use [Composer](http://getcomposer.org/) to add the [package](https://pac
 ```json
 {
   "require": {
-    "soundasleep/html2text": "~1.0"
+    "soundasleep/html2text": "~1.1"
   }
 }
 ```
