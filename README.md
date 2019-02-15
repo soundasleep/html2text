@@ -1,7 +1,8 @@
 html2text [![Build Status](https://travis-ci.org/soundasleep/html2text.svg?branch=master)](https://travis-ci.org/soundasleep/html2text) [![Total Downloads](https://poser.pugx.org/soundasleep/html2text/downloads.png)](https://packagist.org/packages/soundasleep/html2text)
 =========
 
-html2text is a very simple script that uses PHP's DOM methods to load from HTML, and then iterates over the resulting DOM to correctly output plain text. For example:
+html2text is a very simple script that uses DOM methods to convert HTML into a format similar to what would be
+rendered by a browser - perfect for places where you need a quick text representation. For example:
 
 ```html
 <html>

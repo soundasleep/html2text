@@ -88,6 +88,13 @@ class Html2Text {
 		);
 	}
 
+	static function zwnjCodes() {
+		return array(
+			"\xe2\x80\x8c",
+			"\u200c",
+		);
+	}
+
 	/**
 	 * Remove leading or trailing spaces and excess empty lines from provided multiline text
 	 *
@@ -108,7 +115,7 @@ class Html2Text {
 		// convert non-breaking spaces to regular spaces to prevent output issues,
 		// do it here so they do NOT get removed with other leading spaces, as they
 		// are sometimes used for indentation
-		$text = str_replace(static::nbspCodes(), " ", $text);
+		$text = static::renderText($text);
 
 		// remove trailing whitespace
 		$text = rtrim($text);
@@ -178,8 +185,22 @@ class Html2Text {
 		return strpos($html, "urn:schemas-microsoft-com:office") !== false;
 	}
 
+	/**
+	 * Replace any special characters with simple text versions, to prevent output issues:
+	 * - Convert non-breaking spaces to regular spaces; and
+	 * - Convert zero-width non-joiners to '' (nothing).
+	 *
+	 * This is to match our goal of rendering documents as they would be rendered
+	 * by a browser.
+	 */
+	static function renderText($text) {
+		$text = str_replace(static::nbspCodes(), " ", $text);
+		$text = str_replace(static::zwnjCodes(), "", $text);
+		return $text;
+	}
+
 	static function isWhitespace($text) {
-		return strlen(trim(str_replace(static::nbspCodes(), " ", $text), "\n\r\t ")) === 0;
+		return strlen(trim(static::renderText($text), "\n\r\t ")) === 0;
 	}
 
 	static function nextChildName($node) {
@@ -211,7 +232,7 @@ class Html2Text {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			if ($in_pre) {
-				$text = "\n" . trim(str_replace(static::nbspCodes(), " ", $node->wholeText), "\n\r\t ") . "\n";
+				$text = "\n" . trim(static::renderText($node->wholeText), "\n\r\t ") . "\n";
 
 				// Remove trailing whitespace only
 				$text = preg_replace("/[ \t]*\n/im", "\n", $text);
@@ -220,7 +241,7 @@ class Html2Text {
 				return str_replace("\n", "\r", $text);
 
 			} else {
-				$text = str_replace(static::nbspCodes(), " ", $node->wholeText);
+				$text = static::renderText($node->wholeText);
 				$text = preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $text);
 
 				if (!static::isWhitespace($text) && ($prevName == 'p' || $prevName == 'div')) {

@@ -106,6 +106,10 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 		$this->doTest("huge-msoffice");
 	}
 
+	function testZeroWidthNonJoiners() {
+		$this->doTest("zero-width-non-joiners");
+	}
+
 	/**
 	 * @expectedException PHPUnit\Framework\Error\Warning
 	 */
