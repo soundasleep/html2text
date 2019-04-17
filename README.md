@@ -70,7 +70,8 @@ You can also include the supplied `html2text.php` and use `$text = convert_html_
 | Option | Default | Description |
 |--------|---------|-------------|
 | **ignore_errors** | `false` | Set to `true` to ignore any XML parsing errors. |
-| **drop_links** | `false` | Set to `true` to not render links as `[http://foo.com](My Link)`, but rather just `My Link`. |
+| **drop_links** | `false` | Set to `true` to not render links as `[My link] (http://foo.com)`, but rather just `My Link`. |
+| **surround_links_with_brackets** | `true` | Set to `false` to not render links as `[http://foo.com](My Link)`, but rather just `My link (http://foo.com)`. |
 
 Pass along options as a second argument to `convert`, for example:
 
