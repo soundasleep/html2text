@@ -11,6 +11,24 @@ class Html2Text {
 		);
 	}
 
+	static function validateOptions($options): array {
+        if ($options === false || $options === true) {
+            // Using old style (< 1.0) of passing in options
+            $options = array('ignore_errors' => $options);
+        }
+
+        $options = array_merge(static::defaultOptions(), $options);
+
+        // check all options are valid
+        foreach ($options as $key => $value) {
+            if (!in_array($key, array_keys(static::defaultOptions()))) {
+                throw new \InvalidArgumentException("Unknown html2text option '$key'");
+            }
+        }
+
+        return $options;
+    }
+
 	/**
 	 * Tries to convert the given HTML into a plain text format - best suited for
 	 * e-mail display, etc.
@@ -22,47 +40,89 @@ class Html2Text {
 	 * </ul>
 	 *
 	 * @param string $html the input HTML
-	 * @param boolean $ignore_error Ignore xml parsing errors
+	 * @param bool|array $options if true or if key 'ignore_errors', Ignore xml parsing errors
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link \DOMDocument}
 	 */
 	public static function convert($html, $options = array()) {
 
-		if ($options === false || $options === true) {
-			// Using old style (< 1.0) of passing in options
-			$options = array('ignore_errors' => $options);
-		}
+		$options = static::validateOptions($options);
 
-		$options = array_merge(static::defaultOptions(), $options);
+        list('doc' => $doc, 'is_office_document' => $is_office_document) = static::getDom(
+            $html,
+            $options['ignore_errors']
+        );
 
-		// check all options are valid
-		foreach ($options as $key => $value) {
-			if (!in_array($key, array_keys(static::defaultOptions()))) {
-				throw new \InvalidArgumentException("Unknown html2text option '$key'");
-			}
-		}
-
-		$is_office_document = static::isOfficeDocument($html);
-
-		if ($is_office_document) {
-			// remove office namespace
-			$html = str_replace(array("<o:p>", "</o:p>"), "", $html);
-		}
-
-		$html = static::fixNewlines($html);
-		if (mb_detect_encoding($html, "UTF-8", true)) {
-			$html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
-		}
-
-		$doc = static::getDocument($html, $options['ignore_errors']);
-
-		$output = static::iterateOverNode($doc, null, false, $is_office_document, $options);
-
-		// process output for whitespace/newlines
-		$output = static::processWhitespaceNewlines($output);
-
-		return $output;
+        return static::convertDOM($doc, $options, $is_office_document);
 	}
+
+    /**
+     * Tries to convert the given HTML into a DOM object
+     *
+     * <p>In particular, it tries to maintain the following features:
+     * <ul>
+     *   <li>Links are maintained, with the 'href' copied over
+     *   <li>Information in the &lt;head&gt; is lost
+     * </ul>
+     *
+     * @param string $html the input HTML
+     * @param bool   $ignore_errors
+     * @return array associative array, with doc linking to the document, and is_office_document a boolean indicating
+     *               if the document is an office document
+     * @throws Html2TextException if the HTML could not be loaded as a <a
+     *                            href='psi_element://\DOMDocument'>\DOMDocument</a>
+     */
+    public static function getDom(string $html, bool $ignore_errors): array
+    {
+        $is_office_document = static::isOfficeDocument($html);
+
+        if ($is_office_document) {
+            // remove office namespace
+            $html = str_replace(["<o:p>", "</o:p>"], "", $html);
+        }
+
+        $html = static::fixNewlines($html);
+        if (mb_detect_encoding($html, "UTF-8", true)) {
+            $html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
+        }
+
+        return [
+            'doc' => static::getDocument($html, $ignore_errors),
+            'is_office_document' => $is_office_document,
+        ];
+    }
+
+    /**
+     * Tries to convert the given DOM object into a plain text format - best suited for
+     * e-mail display, etc.
+     *
+     * <p>In particular, it tries to maintain the following features:
+     * <ul>
+     *   <li>Links are maintained, with the 'href' copied over
+     *   <li>Information in the &lt;head&gt; is lost
+     * </ul>
+     *
+     * @param \DOMDocument Dom
+     * @param array $options
+     * @param bool  $is_office_document
+     * @param bool  $clone_dom
+     * @return string the HTML converted, as best as possible, to text
+     */
+    public static function convertDOM($doc, array $options, bool $is_office_document = false, bool $clone_dom = false): string
+    {
+        $options = static::validateOptions($options);
+
+        if ($clone_dom) {
+            $doc = clone $doc;
+        }
+
+        $output = static::iterateOverNode($doc, null, false, $is_office_document, $options);
+
+        // process output for whitespace/newlines
+        $output = static::processWhitespaceNewlines($output);
+
+        return $output;
+    }
 
 	/**
 	 * Unify newlines; in particular, \r\n becomes \n, and
