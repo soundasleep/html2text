@@ -8,6 +8,7 @@ class Html2Text {
 		return array(
 			'ignore_errors' => false,
 			'drop_links'    => false,
+			'drop_images'	=> false
 		);
 	}
 
@@ -467,7 +468,9 @@ class Html2Text {
 				break;
 
 			case "img":
-				if ($node->getAttribute("title")) {
+				if ($options["drop_images"]) {
+					$output = "";
+				} elseif ($node->getAttribute("title")) {
 					$output = "[" . $node->getAttribute("title") . "]";
 				} elseif ($node->getAttribute("alt")) {
 					$output = "[" . $node->getAttribute("alt") . "]";

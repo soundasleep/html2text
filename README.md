@@ -71,6 +71,7 @@ You can also include the supplied `html2text.php` and use `$text = convert_html_
 |--------|---------|-------------|
 | **ignore_errors** | `false` | Set to `true` to ignore any XML parsing errors. |
 | **drop_links** | `false` | Set to `true` to not render links as `[http://foo.com](My Link)`, but rather just `My Link`. |
+| **drop_images** | `false` | Set to `true` to not render img tags as `[alt or title text]`, but skip them |
 
 Pass along options as a second argument to `convert`, for example:
 

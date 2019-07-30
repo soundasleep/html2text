@@ -78,6 +78,10 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 		$this->doTest("images");
 	}
 
+    function testImagesDisabled() {
+        $this->doTest("images-disabled", [ 'drop_images' => true ]);
+    }
+
 	function testNonBreakingSpaces() {
 		$this->doTest("non-breaking-spaces");
 	}
