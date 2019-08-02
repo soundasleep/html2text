@@ -200,7 +200,7 @@ class Html2Text {
 	}
 
 	static function isWhitespace($text) {
-		return strlen(trim(static::renderText($text), "\n\r\t ")) === 0;
+		return strlen(trim(static::renderText($text), "\n\r\t")) === 0;
 	}
 
 	static function nextChildName($node) {
