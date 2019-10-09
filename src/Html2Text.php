@@ -6,8 +6,9 @@ class Html2Text {
 
 	public static function defaultOptions() {
 		return array(
-			'ignore_errors' => false,
-			'drop_links'    => false,
+			'ignore_errors'     => false,
+			'drop_links'        => false,
+			'keep_empty_lines'  => false,
 		);
 	}
 
@@ -59,7 +60,7 @@ class Html2Text {
 		$output = static::iterateOverNode($doc, null, false, $is_office_document, $options);
 
 		// process output for whitespace/newlines
-		$output = static::processWhitespaceNewlines($output);
+		$output = static::processWhitespaceNewlines($output, $options['keep_empty_lines']);
 
 		return $output;
 	}
@@ -99,9 +100,10 @@ class Html2Text {
 	 * Remove leading or trailing spaces and excess empty lines from provided multiline text
 	 *
 	 * @param string $text multiline text any number of leading or trailing spaces or excess lines
+	 * @param boolean $remove_empty_lines remove unnecessary empty lines or not
 	 * @return string the fixed text
 	 */
-	static function processWhitespaceNewlines($text) {
+	static function processWhitespaceNewlines($text, $keep_empty_lines = false) {
 
 		// remove excess spaces around tabs
 		$text = preg_replace("/ *\t */im", "\t", $text);
@@ -127,7 +129,9 @@ class Html2Text {
 		$text = static::fixNewLines($text);
 
 		// remove unnecessary empty lines
-		$text = preg_replace("/\n\n\n*/im", "\n\n", $text);
+		if (!$keep_empty_lines) {
+		    $text = preg_replace("/\n\n\n*/im", "\n\n", $text);
+		}
 
 		return $text;
 	}
@@ -482,7 +486,7 @@ class Html2Text {
 
 			case "blockquote":
 				// process quoted text for whitespace/newlines
-				$output = static::processWhitespaceNewlines($output);
+				$output = static::processWhitespaceNewlines($output, $options['keep_empty_lines']);
 
 				// add leading newline
 				$output = "\n" . $output;
