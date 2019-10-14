@@ -1,32 +1,51 @@
-{
-  "name": "soundasleep/html2text",
-  "description": "A PHP script to convert HTML into a plain text format",
-  "type": "library",
-  "keywords": [ "php", "html", "text", "email" ],
-  "homepage": "https://github.com/soundasleep/html2text",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Jevon Wright",
-      "homepage": "https://jevon.org",
-      "role": "Developer"
+<?php
+// Assuming you installed from Composer:
+require "../vendor/autoload.php";
+
+
+// An example HTML document:
+$html = <<< 'HERE'
+<!DOCTYPE html>
+<html xmlns:tpl="http://cphwebsolutions.dk/2013/tpl">
+    <head>
+        <title tpl:replace="page.title">Welcome</title>
+        <link href="css/styles.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <h1 id="test" tpl:replace="page.headline">Welcome!</h1>
+        <p tpl:replace="page.content"></p>
+        <audio><source src="test.txt"/></audio>
+    </body>
+</html>
+HERE;
+
+// Parse the document. $dom is a DOMDocument.
+$dom = HTML5::loadHTML($html);
+
+$xpath = new DOMXpath($dom);
+$xpath->registerNamespace("tpl", "http://cphwebsolutions.dk/2013/tpl");
+
+// example 1: for everything with an id
+//$elements = $xpath->query("//*[@id]");
+
+// example 2: for node data in a selected id
+//$elements = $xpath->query("/html/body/div[@id='yourTagIdHere']");
+
+// example 3: same as above with wildcard
+$elements = $xpath->query("//*[@tpl:replace]");
+
+if (!is_null($elements)) {
+  foreach ($elements as $element) {
+    echo "<br/>[". $element->nodeName. "] ";
+    echo "<br/> ". $element->attributes->length. "\n";
+
+    for ($i=0; $i<$element->attributes->length;$i++) {
+        echo " ".$element->attributes->item($i)->nodeName."<br/>\n";
     }
-  ],
-  "autoload": {
-    "psr-4": {
-      "Soundasleep\\": "src"
+
+    $nodes = $element->childNodes;
+    foreach ($nodes as $node) {
+      echo $node->nodeName. "\n";
     }
-  },
-  "support": {
-    "email": "support@jevon.org"
-  },
-  "require": {
-    "php": ">=7.0",
-    "ext-dom": "*",
-    "ext-libxml": "*"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "~7.0",
-    "soundasleep/component-tests": "~0.2"
   }
 }
