@@ -407,6 +407,8 @@ class Html2Text {
 				break;
 
 			case "div":
+            case "span":
+			case "strong":
 				break;
 
 			case "a":
