@@ -26,6 +26,18 @@ class Html2Text {
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link \DOMDocument}
 	 */
+	
+	// when installed using the Composer package
+	$text = Html2Text\Html2Text::convert($html);
+
+// usage when installed using html2text.php
+	require('html2text.php');
+	$text = convert_html_to_text($html);
+	
+	
+	
+	
+	
 	public static function convert($html, $options = array()) {
 
 		if ($options === false || $options === true) {
