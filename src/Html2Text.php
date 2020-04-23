@@ -285,6 +285,7 @@ class Html2Text {
 			case "ol":
 			case "ul":
 			case "pre":
+                        case "table":
 				// add two newlines
 				$output = "\n\n";
 				break;
@@ -396,6 +397,7 @@ class Html2Text {
 			case "h5":
 			case "h6":
 			case "pre":
+                        case "table":
 			case "p":
 				// add two lines
 				$output .= "\n\n";

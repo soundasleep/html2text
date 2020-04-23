@@ -19,6 +19,7 @@ You're currently finding about
 per day
 
 [Number of cats found]
+
 ---------------------------------------------------------------
 
 Your last cat was found two days ago.
