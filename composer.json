@@ -1,6 +1,6 @@
 {
-  "name": "soundasleep/html2text",
-  "description": "A PHP script to convert HTML into a plain text format",
+  "name": "jmartsch/html2text",
+  "description": "Fork of soundasleep/html2text. A PHP script to convert HTML into a plain text format",
   "type": "library",
   "keywords": [ "php", "html", "text", "email" ],
   "homepage": "https://github.com/soundasleep/html2text",
