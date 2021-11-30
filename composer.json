@@ -1,9 +1,9 @@
 {
-  "name": "soundasleep/html2text",
+  "name": "fglueck/html2text",
   "description": "A PHP script to convert HTML into a plain text format",
   "type": "library",
   "keywords": [ "php", "html", "text", "email" ],
-  "homepage": "https://github.com/soundasleep/html2text",
+  "homepage": "https://github.com/fglueck/html2text",
   "license": "MIT",
   "authors": [
     {
