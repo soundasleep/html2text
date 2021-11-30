@@ -7,8 +7,8 @@
   "license": "MIT",
   "authors": [
     {
-      "name": "Jevon Wright",
-      "homepage": "https://jevon.org",
+      "name": "Frank Glück",
+      "homepage": "https://dozent.net",
       "role": "Developer"
     }
   ],
@@ -16,9 +16,6 @@
     "psr-4": {
       "Soundasleep\\": "src"
     }
-  },
-  "support": {
-    "email": "support@jevon.org"
   },
   "require": {
     "php": ">=7.0",
