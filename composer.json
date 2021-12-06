@@ -38,7 +38,6 @@
 	"dist": {
 		"type": "zip",
 		"url": "https://api.github.com/repos/fglueck/html2text/zipball,
-		"reference": "a79646ad48edf2813037cc56b16ed5b12ce23e47",
 		"shasum": ""
 	}
 }
