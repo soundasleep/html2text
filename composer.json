@@ -1,29 +1,28 @@
 {
-  "name": "fglueck/html2text",
-  "description": "A PHP script to convert HTML into a plain text format",
-  "type": "library",
-  "keywords": [ "php", "html", "text", "email" ],
-  "homepage": "https://github.com/fglueck/html2text",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Frank Glück",
-      "homepage": "https://dozent.net",
-      "role": "Developer"
+    "name": "fglueck/html2text",
+    "description": "A PHP script to convert HTML into a plain text format",
+    "type": "library",
+    "keywords": ["php", "html", "text", "email"],
+    "homepage": "https://github.com/fglueck/html2text",
+    "license": "MIT",
+    "authors": [{
+            "name": "Frank Glück",
+            "homepage": "https://dozent.net",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Soundasleep\\": "src"
+        }
+    },
+    "require": {
+        "php": ">=7.0",
+        "ext-dom": "*",
+        "ext-libxml": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~7.0",
+        "soundasleep/component-tests": "~0.2"
     }
-  ],
-  "autoload": {
-    "psr-4": {
-      "Soundasleep\\": "src"
-    }
-  },
-  "require": {
-    "php": ">=7.0",
-    "ext-dom": "*",
-    "ext-libxml": "*"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "~7.0",
-    "soundasleep/component-tests": "~0.2"
-  }
 }
