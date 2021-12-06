@@ -33,11 +33,10 @@
 	},
 	"source": {
 		"type": "git",
-		"url": "https://github.com/fglueck/html2text.git",
+		"url": "https://github.com/fglueck/html2text.git"
 	},
 	"dist": {
 		"type": "zip",
-		"url": "https://api.github.com/repos/fglueck/html2text/zipball,
-		"shasum": ""
+		"url": "https://api.github.com/repos/fglueck/html2text/zipball"
 	}
 }
