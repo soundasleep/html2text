@@ -110,11 +110,9 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 		$this->doTest("zero-width-non-joiners");
 	}
 
-	/**
-	 * @expectedException PHPUnit\Framework\Error\Warning
-	 */
-	function testInvalidXML() {
-		$this->doTest("invalid", array('ignore_errors' => false));
+    function testInvalidXML() {
+        $this->expectWarning();
+        $this->doTest("invalid", array('ignore_errors' => false));
 	}
 
 	function testInvalidXMLIgnore() {
@@ -126,11 +124,9 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 		$this->doTest("invalid", true);
 	}
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
-	function testInvalidOption() {
-		$this->doTest("basic", array('invalid_option' => true));
+    function testInvalidOption() {
+        $this->expectException(InvalidArgumentException::class);
+        $this->doTest("basic", array('invalid_option' => true));
 	}
 
 	function testBasicDropLinks() {
