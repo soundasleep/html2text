@@ -1,4 +1,4 @@
-html2text [![Build Status](https://travis-ci.org/soundasleep/html2text.svg?branch=master)](https://travis-ci.org/soundasleep/html2text) [![Total Downloads](https://poser.pugx.org/soundasleep/html2text/downloads.png)](https://packagist.org/packages/soundasleep/html2text)
+![example workflow](https://github.com/soundasleep/html2text/actions/workflows/test.yml/badge.svg) [![Total Downloads](https://poser.pugx.org/soundasleep/html2text/downloads.png)](https://packagist.org/packages/soundasleep/html2text)
 =========
 
 html2text is a very simple script that uses DOM methods to convert HTML into a format similar to what would be
