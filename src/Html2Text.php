@@ -4,6 +4,8 @@ namespace Soundasleep;
 
 class Html2Text {
 
+	private static $margin = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ol', 'ul', 'hr', 'blockquote'];
+
 	public static function defaultOptions() {
 		return array(
 			'ignore_errors' => false,
@@ -124,12 +126,7 @@ class Html2Text {
 		$text = preg_replace("/[ \t]*\n/im", "\n", $text);
 
 		// unarmor pre blocks
-		$text = static::fixNewLines($text);
-
-		// remove unnecessary empty lines
-		$text = preg_replace("/\n\n\n*/im", "\n\n", $text);
-
-		return $text;
+		return static::fixNewLines($text);
 	}
 
 	/**
@@ -232,7 +229,7 @@ class Html2Text {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			if ($in_pre) {
-				$text = "\n" . trim(static::renderText($node->wholeText), "\n\r\t ") . "\n";
+				$text = trim(static::renderText($node->wholeText), "\n\r\t ");
 
 				// Remove trailing whitespace only
 				$text = preg_replace("/[ \t]*\n/im", "\n", $text);
@@ -244,7 +241,7 @@ class Html2Text {
 				$text = static::renderText($node->wholeText);
 				$text = preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $text);
 
-				if (!static::isWhitespace($text) && ($prevName == 'p' || $prevName == 'div')) {
+				if (!static::isWhitespace($text) && $prevName == 'div') {
 					return "\n" . $text;
 				}
 				return $text;
@@ -262,11 +259,16 @@ class Html2Text {
 		// start whitespace
 		switch ($name) {
 			case "hr":
-				$prefix = '';
-				if ($prevName != null) {
-					$prefix = "\n";
+				$output = '---------------------------------------------------------------';
+				if (! in_array($prevName, self::$margin)) {
+					$output = "\n" . $output;
 				}
-				return $prefix . "---------------------------------------------------------------\n";
+
+				if (in_array($nextName, self::$margin)) {
+					$output .= "\n";
+				}
+
+				return $output . "\n";
 
 			case "style":
 			case "head":
@@ -282,9 +284,12 @@ class Html2Text {
 			case "h4":
 			case "h5":
 			case "h6":
-			case "ol":
-			case "ul":
 			case "pre":
+				if (in_array($prevName, self::$margin)) {
+					$output = "";
+					break;
+				}
+
 				// add two newlines
 				$output = "\n\n";
 				break;
@@ -308,18 +313,18 @@ class Html2Text {
 					break;
 				}
 
+				if (in_array($prevName, self::$margin)) {
+					$output = "";
+					break;
+				}
+
 				// add two lines
 				$output = "\n\n";
 				break;
 
-			case "tr":
-				// add one line
-				$output = "\n";
-				break;
-
 			case "div":
 				$output = "";
-				if ($prevName !== null) {
+				if ($prevName !== 'p' && $prevName !== null) {
 					// add one line
 					$output .= "\n";
 				}
@@ -396,12 +401,15 @@ class Html2Text {
 			case "h5":
 			case "h6":
 			case "pre":
+			case "ol":
+			case "ul":
 			case "p":
 				// add two lines
 				$output .= "\n\n";
 				break;
 
 			case "br":
+			case "tr":
 				// add one line
 				$output .= "\n";
 				break;
@@ -458,12 +466,6 @@ class Html2Text {
 					}
 				}
 
-				// does the next node require additional whitespace?
-				switch ($nextName) {
-					case "h1": case "h2": case "h3": case "h4": case "h5": case "h6":
-						$output .= "\n";
-						break;
-				}
 				break;
 
 			case "img":
@@ -477,7 +479,9 @@ class Html2Text {
 				break;
 
 			case "li":
-				$output .= "\n";
+				if ($nextName === 'li') {
+					$output .= "\n";
+				}
 				break;
 
 			case "blockquote":
@@ -485,7 +489,7 @@ class Html2Text {
 				$output = static::processWhitespaceNewlines($output);
 
 				// add leading newline
-				$output = "\n" . $output;
+				$output = (! in_array($prevName, self::$margin) ? "\n" : "> ") . $output;
 
 				// prepend '> ' at the beginning of all lines
 				$output = preg_replace("/\n/im", "\n> ", $output);
@@ -494,8 +498,9 @@ class Html2Text {
 				$output = preg_replace("/\n> >/im", "\n>>", $output);
 
 				// add another leading newline and trailing newlines
-				$output = "\n" . $output . "\n\n";
+				$output = (! in_array($prevName, self::$margin) ? "\n" : "") . $output . "\n\n";
 				break;
+
 			default:
 				// do nothing
 		}
