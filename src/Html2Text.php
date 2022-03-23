@@ -404,6 +404,12 @@ class Html2Text {
 			case "ol":
 			case "ul":
 			case "p":
+				// padded paragraph handling
+				if (empty($output) && in_array($prevName, self::$margin)) {
+					$output .= "\n";
+					break;
+				}
+
 				// add two lines
 				$output .= "\n\n";
 				break;
