@@ -62,17 +62,17 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 		$this->doTest("newlines");
 	}
 
-//	function testNestedDivs() {
-//		$this->doTest("nested-divs");
-//	}
+	function testNestedDivs() {
+		$this->doTest("nested-divs");
+	}
 
 	function testBlockQuotes() {
 		$this->doTest("blockquotes");
 	}
 
-//	function testFullEmail() {
-//		$this->doTest("full_email");
-//	}
+	function testFullEmail() {
+		$this->doTest("full_email");
+	}
 
 	function testImages() {
 		$this->doTest("images");
