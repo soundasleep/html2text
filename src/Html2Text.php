@@ -10,6 +10,7 @@ class Html2Text {
 		return array(
 			'ignore_errors' => false,
 			'drop_links'    => false,
+			'lf_per_block'	=> 2,
 		);
 	}
 
@@ -319,7 +320,7 @@ class Html2Text {
 				}
 
 				// add two lines
-				$output = "\n\n";
+				$output = str_repeat("\n", $options['lf_per_block']);
 				break;
 
 			case "div":
@@ -411,7 +412,7 @@ class Html2Text {
 				}
 
 				// add two lines
-				$output .= "\n\n";
+				$output .= str_repeat("\n", $options['lf_per_block']);
 				break;
 
 			case "br":

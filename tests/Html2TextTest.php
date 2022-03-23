@@ -140,4 +140,8 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
     function testPaddedParagraphs() {
         $this->doTest("padded-paragraphs");
     }
+
+    function testLfPerBlock() {
+        $this->doTest("lf-per-block", array('lf_per_block' => 1));
+    }
 }
