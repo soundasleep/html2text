@@ -136,5 +136,9 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 	function testAnchorsDropLinks() {
 		$this->doTestWithResults("anchors", "anchors.no-links", array('drop_links' => true));
 	}
+	
+        function testOneNewlineTagsOption() {
+            $this->doTestWithResults("lists-one-newline-ul", "lists-one-newline-ul", array('one_newline_tags' => ['ul']));
+	}
 
 }

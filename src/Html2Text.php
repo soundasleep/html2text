@@ -8,6 +8,7 @@ class Html2Text {
 		return array(
 			'ignore_errors' => false,
 			'drop_links'    => false,
+			'one_newline_tags' => []
 		);
 	}
 
@@ -258,7 +259,6 @@ class Html2Text {
 
 		$name = strtolower($node->nodeName);
 		$nextName = static::nextChildName($node);
-
 		// start whitespace
 		switch ($name) {
 			case "hr":
@@ -285,8 +285,12 @@ class Html2Text {
 			case "ol":
 			case "ul":
 			case "pre":
-				// add two newlines
-				$output = "\n\n";
+				if(in_array($name, $options['one_newline_tags'])){
+					$output = "\n";
+				}else{
+					// add two newlines
+					$output = "\n\n";
+				}
 				break;
 
 			case "td":
@@ -334,7 +338,7 @@ class Html2Text {
 				$output = "";
 				break;
 		}
-
+		
 		// debug
 		//$output .= "[$name,$nextName]";
 
@@ -350,7 +354,7 @@ class Html2Text {
 			while ($n != null) {
 
 				$text = static::iterateOverNode($n, $previousSiblingName, $in_pre || $name == 'pre', $is_office_document, $options);
-
+		
 				// Pass current node name to next child, as previousSibling does not appear to get populated
 				if ($n instanceof \DOMDocumentType
 					|| $n instanceof \DOMProcessingInstruction
@@ -499,7 +503,7 @@ class Html2Text {
 			default:
 				// do nothing
 		}
-
+                
 		return $output;
 	}
 }
