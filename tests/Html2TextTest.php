@@ -7,7 +7,7 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 	// delete all failures before we run
 	public static function setUpBeforeClass(): void {
 		foreach (new DirectoryIterator(__DIR__ . '/failures') as $fileInfo) {
-			if(!$fileInfo->isDot()) {
+			if ($fileInfo->getFileName()[0] != '.') {
 				unlink($fileInfo->getPathname());
 			}
 		}
