@@ -4,6 +4,15 @@ require(__DIR__ . "/../src/Html2Text.php");
 
 class Html2TextTest extends \PHPUnit\Framework\TestCase {
 
+	// delete all failures before we run
+	public static function setUpBeforeClass(): void {
+		foreach (new DirectoryIterator(__DIR__ . '/failures') as $fileInfo) {
+			if(!$fileInfo->isDot()) {
+				unlink($fileInfo->getPathname());
+			}
+		}
+	}
+
 	/**
 	 * @dataProvider providerFiles
 	 */
@@ -45,7 +54,6 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 			['images'],
 			['non-breaking-spaces'],
 			['utf8-example'],
-			['windows-1252-example'],
 			['msoffice'],
 			['dom-processing'],
 			['empty'],
@@ -81,4 +89,7 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 		$this->doTestWithResults("anchors", "anchors.no-links", ['drop_links' => true]);
 	}
 
+	public function testWindows1252() {
+		$this->doTestWithResults("windows-1252-example", "windows-1252-example", ['char_set' => 'windows-1252']);
+	}
 }
