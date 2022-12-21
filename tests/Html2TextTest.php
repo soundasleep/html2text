@@ -12,17 +12,19 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	function doTestWithResults(string $test, string $result, $options = []) {
-		$this->assertTrue(file_exists(__DIR__ . "/$test.html"), "File '$test.html' did not exist");
-		$this->assertTrue(file_exists(__DIR__ . "/$result.txt"), "File '$result.txt' did not exist");
-		$input = file_get_contents(__DIR__ . "/$test.html");
-		$expected = \Soundasleep\Html2Text::fixNewlines(file_get_contents(__DIR__ . "/$result.txt"));
+		$html = __DIR__ . "/html/$test.html";
+		$txt = __DIR__ . "/txt/$result.txt";
+		$this->assertTrue(file_exists($html), "File '{$html}' does not exist");
+		$this->assertTrue(file_exists($txt), "File '{$txt}' does not exist");
+		$input = file_get_contents($html);
+		$expected = \Soundasleep\Html2Text::fixNewlines(file_get_contents($txt));
 
 		$output = \Soundasleep\Html2Text::convert($input, $options);
 
 		if ($output != $expected) {
-			file_put_contents(__DIR__ . "/$result.output", $output);
+			file_put_contents(__DIR__ . "/failures/$result.output", $output);
 		}
-		$this->assertEquals($expected, $output, __DIR__ . '/' . $test . '.html test failed to convert to ' . __DIR__ . '/' . $result . '.txt');
+		$this->assertEquals($expected, $output, "{$html} file failed to convert to {$txt}");
 	}
 
 	public function providerFiles() {
