@@ -4,6 +4,7 @@ namespace Soundasleep;
 
 class Html2Text {
 
+	/** @return array<string, bool | string> */
 	public static function defaultOptions(): array {
 		return [
 			'ignore_errors' => false,
@@ -23,7 +24,7 @@ class Html2Text {
 	 * </ul>
 	 *
 	 * @param string $html the input HTML
-	 * @param boolean|array $options if boolean, Ignore xml parsing errors, else ['ignore_errors' => false, 'drop_links' => false, 'char_set' => 'auto']
+	 * @param boolean|array<string, bool | string> $options if boolean, Ignore xml parsing errors, else ['ignore_errors' => false, 'drop_links' => false, 'char_set' => 'auto']
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link \DOMDocument}
 	 */
@@ -43,26 +44,26 @@ class Html2Text {
 			}
 		}
 
-		$is_office_document = static::isOfficeDocument($html);
+		$is_office_document = self::isOfficeDocument($html);
 
 		if ($is_office_document) {
 			// remove office namespace
 			$html = str_replace(["<o:p>", "</o:p>"], "", $html);
 		}
 
-		$html = static::fixNewlines($html);
+		$html = self::fixNewlines($html);
 
 		// use mb_convert_encoding for legacy versions of php
 		if (PHP_MAJOR_VERSION * 10 + PHP_MINOR_VERSION < 81 && mb_detect_encoding($html, "UTF-8", true)) {
 			$html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
 		}
 
-		$doc = static::getDocument($html, $options);
+		$doc = self::getDocument($html, $options);
 
-		$output = static::iterateOverNode($doc, null, false, $is_office_document, $options);
+		$output = self::iterateOverNode($doc, null, false, $is_office_document, $options);
 
 		// process output for whitespace/newlines
-		$output = static::processWhitespaceNewlines($output);
+		$output = self::processWhitespaceNewlines($output);
 
 		return $output;
 	}
@@ -84,6 +85,7 @@ class Html2Text {
 		return $text;
 	}
 
+	/** @return array<string> */
 	public static function nbspCodes(): array {
 		return [
 			"\xc2\xa0",
@@ -91,6 +93,7 @@ class Html2Text {
 		];
 	}
 
+	/** @return array<string> */
 	public static function zwnjCodes(): array {
 		return [
 			"\xe2\x80\x8c",
@@ -118,7 +121,7 @@ class Html2Text {
 		// convert non-breaking spaces to regular spaces to prevent output issues,
 		// do it here so they do NOT get removed with other leading spaces, as they
 		// are sometimes used for indentation
-		$text = static::renderText($text);
+		$text = self::renderText($text);
 
 		// remove trailing whitespace
 		$text = rtrim($text);
@@ -127,7 +130,7 @@ class Html2Text {
 		$text = preg_replace("/[ \t]*\n/im", "\n", $text);
 
 		// unarmor pre blocks
-		$text = static::fixNewLines($text);
+		$text = self::fixNewLines($text);
 
 		// remove unnecessary empty lines
 		$text = preg_replace("/\n\n\n*/im", "\n\n", $text);
@@ -143,13 +146,14 @@ class Html2Text {
 	}
 
 	public static function isWhitespace(string $text): bool {
-		return strlen(trim(static::renderText($text), "\n\r\t ")) === 0;
+		return strlen(trim(self::renderText($text), "\n\r\t ")) === 0;
 	}
 
 	/**
 	 * Parse HTML into a DOMDocument
 	 *
 	 * @param string $html the input HTML
+	 * @param array<string, bool | string> $options
 	 * @return \DOMDocument the parsed document tree
 	 */
 	private static function getDocument(string $html, array $options): \DOMDocument {
@@ -218,17 +222,17 @@ class Html2Text {
 	 * by a browser.
 	 */
 	private static function renderText(string $text): string {
-		$text = str_replace(static::nbspCodes(), " ", $text);
-		$text = str_replace(static::zwnjCodes(), "", $text);
+		$text = str_replace(self::nbspCodes(), " ", $text);
+		$text = str_replace(self::zwnjCodes(), "", $text);
 		return $text;
 	}
 
-	private static function nextChildName($node): ?string {
+	private static function nextChildName(?\DOMNode $node): ?string {
 		// get the next child
 		$nextNode = $node->nextSibling;
 		while ($nextNode != null) {
 			if ($nextNode instanceof \DOMText) {
-				if (!static::isWhitespace($nextNode->wholeText)) {
+				if (!self::isWhitespace($nextNode->wholeText)) {
 					break;
 				}
 			}
@@ -248,11 +252,12 @@ class Html2Text {
 		return $nextName;
 	}
 
-	private static function iterateOverNode($node, $prevName, bool $in_pre, bool $is_office_document, $options): string {
+	/** @param array<string, bool | string> $options */
+	private static function iterateOverNode(\DOMNode $node, ?string $prevName, bool $in_pre, bool $is_office_document, array $options): string {
 		if ($node instanceof \DOMText) {
 		  // Replace whitespace characters with a space (equivilant to \s)
 			if ($in_pre) {
-				$text = "\n" . trim(static::renderText($node->wholeText), "\n\r\t ") . "\n";
+				$text = "\n" . trim(self::renderText($node->wholeText), "\n\r\t ") . "\n";
 
 				// Remove trailing whitespace only
 				$text = preg_replace("/[ \t]*\n/im", "\n", $text);
@@ -261,10 +266,10 @@ class Html2Text {
 				return str_replace("\n", "\r", $text);
 
 			}
-			$text = static::renderText($node->wholeText);
+			$text = self::renderText($node->wholeText);
 			$text = preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $text);
 
-			if (!static::isWhitespace($text) && ($prevName == 'p' || $prevName == 'div')) {
+			if (!self::isWhitespace($text) && ($prevName == 'p' || $prevName == 'div')) {
 				return "\n" . $text;
 			}
 			return $text;
@@ -276,7 +281,7 @@ class Html2Text {
 		}
 
 		$name = strtolower($node->nodeName);
-		$nextName = static::nextChildName($node);
+		$nextName = self::nextChildName($node);
 
 		// start whitespace
 		switch ($name) {
@@ -321,6 +326,7 @@ class Html2Text {
 				// To fix this, for any p element with a className of `MsoNormal` (the standard
 				// classname in any Microsoft export or outlook for a paragraph that behaves
 				// like a line return) we skip the first line returns and set the name to br.
+				// @phpstan-ignore-next-line
 				if ($is_office_document && $node->getAttribute('class') == 'MsoNormal') {
 					$output = "";
 					$name = 'br';
@@ -368,12 +374,12 @@ class Html2Text {
 
 			while ($n != null) {
 
-				$text = static::iterateOverNode($n, $previousSiblingName, $in_pre || $name == 'pre', $is_office_document, $options);
+				$text = self::iterateOverNode($n, $previousSiblingName, $in_pre || $name == 'pre', $is_office_document, $options);
 
 				// Pass current node name to next child, as previousSibling does not appear to get populated
 				if ($n instanceof \DOMDocumentType
 					|| $n instanceof \DOMProcessingInstruction
-					|| ($n instanceof \DOMText && static::isWhitespace($text))) {
+					|| ($n instanceof \DOMText && self::isWhitespace($text))) {
 					// Keep current previousSiblingName, these are invisible
 					$trailing_whitespace++;
 				}
@@ -430,6 +436,7 @@ class Html2Text {
 
 			case "a":
 				// links are returned in [text](link) format
+				// @phpstan-ignore-next-line
 				$href = $node->getAttribute("href");
 
 				$output = trim($output);
@@ -439,18 +446,23 @@ class Html2Text {
 					$output = substr($output, 1, strlen($output) - 2);
 
 					// for linking images, the title of the <a> overrides the title of the <img>
+					// @phpstan-ignore-next-line
 					if ($node->getAttribute("title")) {
+						// @phpstan-ignore-next-line
 						$output = $node->getAttribute("title");
 					}
 				}
 
 				// if there is no link text, but a title attr
+				// @phpstan-ignore-next-line
 				if (!$output && $node->getAttribute("title")) {
+					// @phpstan-ignore-next-line
 					$output = $node->getAttribute("title");
 				}
 
 				if ($href == null) {
 					// it doesn't link anywhere
+					// @phpstan-ignore-next-line
 					if ($node->getAttribute("name") != null) {
 						if ($options['drop_links']) {
 							$output = "$output";
@@ -486,9 +498,13 @@ class Html2Text {
 				break;
 
 			case "img":
+				// @phpstan-ignore-next-line
 				if ($node->getAttribute("title")) {
+					// @phpstan-ignore-next-line
 					$output = "[" . $node->getAttribute("title") . "]";
+				// @phpstan-ignore-next-line
 				} elseif ($node->getAttribute("alt")) {
+					// @phpstan-ignore-next-line
 					$output = "[" . $node->getAttribute("alt") . "]";
 				} else {
 					$output = "";
@@ -501,7 +517,7 @@ class Html2Text {
 
 			case "blockquote":
 				// process quoted text for whitespace/newlines
-				$output = static::processWhitespaceNewlines($output);
+				$output = self::processWhitespaceNewlines($output);
 
 				// add leading newline
 				$output = "\n" . $output;
