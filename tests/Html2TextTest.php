@@ -16,11 +16,12 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @dataProvider providerFiles
 	 */
-	public function testFile(string $test) {
+	public function testFile(string $test): void {
 		$this->doTestWithResults($test, $test, []);
 	}
 
-	function doTestWithResults(string $test, string $result, $options = []) {
+	/** @param bool | array<string, bool | string> $options */
+	function doTestWithResults(string $test, string $result, $options = []): void {
 		$html = __DIR__ . "/html/$test.html";
 		$txt = __DIR__ . "/txt/$result.txt";
 		$this->assertTrue(file_exists($html), "File '{$html}' does not exist");
@@ -36,7 +37,8 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals($expected, $output, "{$html} file failed to convert to {$txt}");
 	}
 
-	public function providerFiles() {
+	/** @return array<array<string>> */
+	public function providerFiles(): array {
 		return [
 			['basic'],
 			['anchors'],
@@ -62,34 +64,34 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 		];
 	}
 
-	public function testInvalidXML() {
+	public function testInvalidXML(): void {
 		$this->expectWarning();
 		$this->doTestWithResults("invalid", "invalid", ['ignore_errors' => false]);
 	}
 
-	public function testInvalidXMLIgnore() {
+	public function testInvalidXMLIgnore(): void {
 		$this->doTestWithResults("invalid", "invalid", ['ignore_errors' => true]);
 	}
 
-	public function testInvalidXMLIgnoreOldSyntax() {
+	public function testInvalidXMLIgnoreOldSyntax(): void {
 		// for BC, allow old #convert(text, bool) syntax
 		$this->doTestWithResults("invalid", "invalid", true);
 	}
 
-	public function testInvalidOption() {
+	public function testInvalidOption(): void {
 		$this->expectException(InvalidArgumentException::class);
 		$this->doTestWithResults("basic", "basic", ['invalid_option' => true]);
 	}
 
-	public function testBasicDropLinks() {
+	public function testBasicDropLinks(): void {
 		$this->doTestWithResults("basic", "basic.no-links", ['drop_links' => true]);
 	}
 
-	public function testAnchorsDropLinks() {
+	public function testAnchorsDropLinks(): void {
 		$this->doTestWithResults("anchors", "anchors.no-links", ['drop_links' => true]);
 	}
 
-	public function testWindows1252() {
+	public function testWindows1252(): void {
 		$this->doTestWithResults("windows-1252-example", "windows-1252-example", ['char_set' => 'windows-1252']);
 	}
 }
