@@ -50,9 +50,6 @@ class Html2Text {
 		}
 
 		$html = static::fixNewlines($html);
-		if (mb_detect_encoding($html, "UTF-8", true)) {
-			$html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
-		}
 
 		$doc = static::getDocument($html, $options['ignore_errors']);
 
@@ -159,16 +156,21 @@ class Html2Text {
 			$html = '<body>' . $html . '</body>';
 		}
 
+		$header = '';
+		if (mb_detect_encoding($html, ['UTF-8', 'windows-1252']) == 'UTF-8') {
+			$header = '<?xml encoding="UTF-8">';
+		}
+
 		if ($ignore_error) {
 			$doc->strictErrorChecking = false;
 			$doc->recover = true;
 			$doc->xmlStandalone = true;
 			$old_internal_errors = libxml_use_internal_errors(true);
-			$load_result = $doc->loadHTML($html, LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET | LIBXML_PARSEHUGE);
+			$load_result = $doc->loadHTML($header . $html, LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NONET | LIBXML_PARSEHUGE);
 			libxml_use_internal_errors($old_internal_errors);
 		}
 		else {
-			$load_result = $doc->loadHTML($html);
+			$load_result = $doc->loadHTML($header . $html);
 		}
 
 		if (!$load_result) {
