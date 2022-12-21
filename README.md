@@ -71,6 +71,7 @@ You can also include the supplied `html2text.php` and use `$text = convert_html_
 |--------|---------|-------------|
 | **ignore_errors** | `false` | Set to `true` to ignore any XML parsing errors. |
 | **drop_links** | `false` | Set to `true` to not render links as `[http://foo.com](My Link)`, but rather just `My Link`. |
+| **char_set** | `'auto'` | Specify a specific character set.  Pass multiple character sets (comma separated) to detect encoding, default is ASCII,UTF-8 |
 
 Pass along options as a second argument to `convert`, for example:
 
@@ -90,7 +91,7 @@ Some very basic tests are provided in the `tests/` directory. Run them with `com
 
 ### Class 'DOMDocument' not found
 
-You need to [install the PHP XML extension](https://github.com/soundasleep/html2text/issues/55) for your PHP version. e.g. `apt-get install php7.1-xml`
+You need to [install the PHP XML extension](https://github.com/soundasleep/html2text/issues/55) for your PHP version. e.g. `apt-get install php7.4-xml`
 
 ## License
 
