@@ -26,6 +26,7 @@ jobs:
           coverage: none
       - name: Get composer cache directory
         id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
       - name: Setup composer cache
         uses: actions/cache@v3
         with:
