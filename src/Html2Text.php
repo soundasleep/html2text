@@ -8,6 +8,7 @@ class Html2Text {
 		return [
 			'ignore_errors' => false,
 			'drop_links'    => false,
+			'char_set'      => 'auto'
 		];
 	}
 
@@ -22,7 +23,7 @@ class Html2Text {
 	 * </ul>
 	 *
 	 * @param string $html the input HTML
-	 * @param boolean $ignore_error Ignore xml parsing errors
+	 * @param boolean|array $options if boolean, Ignore xml parsing errors, else ['ignore_errors' => false, 'drop_links' => false, 'char_set' => 'auto']
 	 * @return string the HTML converted, as best as possible, to text
 	 * @throws Html2TextException if the HTML could not be loaded as a {@link \DOMDocument}
 	 */
@@ -51,7 +52,12 @@ class Html2Text {
 
 		$html = static::fixNewlines($html);
 
-		$doc = static::getDocument($html, $options['ignore_errors']);
+		// use mb_convert_encoding for legacy versions of php
+		if (PHP_MAJOR_VERSION * 10 + PHP_MINOR_VERSION < 81 && mb_detect_encoding($html, "UTF-8", true)) {
+			$html = mb_convert_encoding($html, "HTML-ENTITIES", "UTF-8");
+		}
+
+		$doc = static::getDocument($html, $options);
 
 		$output = static::iterateOverNode($doc, null, false, $is_office_document, $options);
 
@@ -156,11 +162,24 @@ class Html2Text {
 		}
 
 		$header = '';
-		if (mb_detect_encoding($html, ['UTF-8', 'windows-1252']) == 'UTF-8') {
-			$header = '<?xml encoding="UTF-8">';
+		// use char sets for modern versions of php
+		if (PHP_MAJOR_VERSION * 10 + PHP_MINOR_VERSION >= 81) {
+			// use specified char_set, or auto detect if not set
+			$char_set = ! empty($options['char_set']) ? $options['char_set'] : 'auto';
+			if ('auto' === $char_set) {
+				$char_set = mb_detect_encoding($html);
+			} else if (strpos($char_set, ',')) {
+				mb_detect_order($char_set);
+				$char_set = mb_detect_encoding($html);
+			}
+			// turn off error detection for Windows-1252 legacy html
+			if (strpos($char_set, '1252')) {
+				$options['ignore_errors'] = true;
+			}
+			$header = '<?xml version="1.0" encoding="' . $char_set . '">';
 		}
 
-		if ($ignore_error) {
+		if (! empty($options['ignore_errors'])) {
 			$doc->strictErrorChecking = false;
 			$doc->recover = true;
 			$doc->xmlStandalone = true;
@@ -241,15 +260,14 @@ class Html2Text {
 				// armor newlines with \r.
 				return str_replace("\n", "\r", $text);
 
-			} else {
-				$text = static::renderText($node->wholeText);
-				$text = preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $text);
-
-				if (!static::isWhitespace($text) && ($prevName == 'p' || $prevName == 'div')) {
-					return "\n" . $text;
-				}
-				return $text;
 			}
+			$text = static::renderText($node->wholeText);
+			$text = preg_replace("/[\\t\\n\\f\\r ]+/im", " ", $text);
+
+			if (!static::isWhitespace($text) && ($prevName == 'p' || $prevName == 'div')) {
+				return "\n" . $text;
+			}
+			return $text;
 		}
 
 		if ($node instanceof \DOMDocumentType || $node instanceof \DOMProcessingInstruction) {
