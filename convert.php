@@ -5,14 +5,17 @@
  *   php -f convert.php [input file]
  */
 
+// Check for arguments count, else throw exception
 if (count($argv) < 2) {
 	throw new \InvalidArgumentException("Expected: php -f convert.php [input file]");
 }
 
+// Check if "File" exists or not
 if (!file_exists($argv[1])) {
 	throw new \InvalidArgumentException("'" . $argv[1] . "' does not exist");
 }
 
+// Get File's content
 $input = file_get_contents($argv[1]);
 
 require_once(__DIR__ . "/src/Html2Text.php");
