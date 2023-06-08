@@ -39,7 +39,7 @@ class Html2Text {
 
 		// check all options are valid
 		foreach ($options as $key => $value) {
-			if (!in_array($key, array_keys(static::defaultOptions()))) {
+			if (!array_key_exists($key, static::defaultOptions())) {
 				throw new \InvalidArgumentException("Unknown html2text option '$key'. Valid options are " . implode(',', static::defaultOptions()));
 			}
 		}
