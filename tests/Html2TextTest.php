@@ -4,34 +4,73 @@ require(__DIR__ . "/../src/Html2Text.php");
 
 class Html2TextTest extends \PHPUnit\Framework\TestCase {
 
-	function doTest($test, $options = array()) {
-		return $this->doTestWithResults($test, $test, $options);
+	// delete all failures before we run
+	public static function setUpBeforeClass(): void {
+		foreach (new DirectoryIterator(__DIR__ . '/failures') as $fileInfo) {
+			if ($fileInfo->getFileName()[0] != '.') {
+				unlink($fileInfo->getPathname());
+			}
+		}
 	}
 
-	function doTestWithResults($test, $result, $options = array()) {
-		$this->assertTrue(file_exists(__DIR__ . "/$test.html"), "File '$test.html' did not exist");
-		$this->assertTrue(file_exists(__DIR__ . "/$result.txt"), "File '$result.txt' did not exist");
-		$input = file_get_contents(__DIR__ . "/$test.html");
-		$expected = \Soundasleep\Html2Text::fixNewlines(file_get_contents(__DIR__ . "/$result.txt"));
+	/**
+	 * @dataProvider providerFiles
+	 */
+	public function testFile(string $test): void {
+		$this->doTestWithResults($test, $test, []);
+	}
+
+	/** @param bool | array<string, bool | string> $options */
+	function doTestWithResults(string $test, string $result, $options = []): void {
+		$html = __DIR__ . "/html/$test.html";
+		$txt = __DIR__ . "/txt/$result.txt";
+		$this->assertTrue(file_exists($html), "File '{$html}' does not exist");
+		$this->assertTrue(file_exists($txt), "File '{$txt}' does not exist");
+		$input = file_get_contents($html);
+		$expected = \Soundasleep\Html2Text::fixNewlines(file_get_contents($txt));
 
 		$output = \Soundasleep\Html2Text::convert($input, $options);
 
 		if ($output != $expected) {
-			file_put_contents(__DIR__ . "/$result.output", $output);
+			file_put_contents(__DIR__ . "/failures/$result.output", $output);
 		}
-		$this->assertEquals($output, $expected);
+		$this->assertEquals($expected, $output, "{$html} file failed to convert to {$txt}");
 	}
 
-	function testBasic() {
-		$this->doTest("basic");
+	/** @return array<array<string>> */
+	public function providerFiles(): array {
+		return [
+			['basic'],
+			['anchors'],
+			['more-anchors'],
+			['test3'],
+			['test4'],
+			['table'],
+			['nbsp'],
+			['lists'],
+			['pre'],
+			['newlines'],
+			['nested-divs'],
+			['blockquotes'],
+			['full_email'],
+			['images'],
+			['non-breaking-spaces'],
+			['utf8-example'],
+			['msoffice'],
+			['dom-processing'],
+			['empty'],
+			['huge-msoffice'],
+			['zero-width-non-joiners'],
+		];
 	}
 
-	function testAnchors() {
-		$this->doTest("anchors");
+	public function testInvalidXML(): void {
+		$this->expectWarning();
+		$this->doTestWithResults("invalid", "invalid", ['ignore_errors' => false]);
 	}
 
-	function testMoreAnchors() {
-		$this->doTest("more-anchors");
+	public function testInvalidXMLIgnore(): void {
+		$this->doTestWithResults("invalid", "invalid", ['ignore_errors' => true]);
 	}
 
 	function test3() {
@@ -127,22 +166,23 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 
 	function testInvalidXMLIgnoreOldSyntax() {
 		// for BC, allow old #convert(text, bool) syntax
-		$this->doTest("invalid", true);
+		$this->doTestWithResults("invalid", "invalid", true);
 	}
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
-	function testInvalidOption() {
-		$this->doTest("basic", array('invalid_option' => true));
+	public function testInvalidOption(): void {
+		$this->expectException(InvalidArgumentException::class);
+		$this->doTestWithResults("basic", "basic", ['invalid_option' => true]);
 	}
 
-	function testBasicDropLinks() {
-		$this->doTestWithResults("basic", "basic.no-links", array('drop_links' => true));
+	public function testBasicDropLinks(): void {
+		$this->doTestWithResults("basic", "basic.no-links", ['drop_links' => true]);
 	}
 
-	function testAnchorsDropLinks() {
-		$this->doTestWithResults("anchors", "anchors.no-links", array('drop_links' => true));
+	public function testAnchorsDropLinks(): void {
+		$this->doTestWithResults("anchors", "anchors.no-links", ['drop_links' => true]);
 	}
 
+	public function testWindows1252(): void {
+		$this->doTestWithResults("windows-1252-example", "windows-1252-example", ['char_set' => 'windows-1252']);
+	}
 }
