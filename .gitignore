@@ -4,3 +4,5 @@ tests/*.output
 vendor/
 **/*.DS_Store
 .idea
+.phpunit.result.cache
+composer.lock
