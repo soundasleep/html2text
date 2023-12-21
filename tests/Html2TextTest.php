@@ -38,7 +38,7 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/** @return array<array<string>> */
-	public function providerFiles(): array {
+	public static function providerFiles(): array {
 		return [
 			['basic'],
 			['anchors'],
@@ -89,6 +89,14 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 
 	public function testAnchorsDropLinks(): void {
 		$this->doTestWithResults("anchors", "anchors.no-links", ['drop_links' => true]);
+	}
+
+	public function testBasicHRefLinks(): void {
+		$this->doTestWithResults("basic", "basic.href-links", ['drop_links' => 'href']);
+	}
+
+	public function testAnchorsHRefLinks(): void {
+		$this->doTestWithResults("anchors", "anchors.href-links", ['drop_links' => 'href']);
 	}
 
 	public function testWindows1252(): void {

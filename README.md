@@ -70,7 +70,7 @@ You can also include the supplied `html2text.php` and use `$text = convert_html_
 | Option | Default | Description |
 |--------|---------|-------------|
 | **ignore_errors** | `false` | Set to `true` to ignore any XML parsing errors. |
-| **drop_links** | `false` | Set to `true` to not render links as `[http://foo.com](My Link)`, but rather just `My Link`. |
+| **drop_links** | `false` | Set to `true` to not render links as `[http://foo.com](My Link)`, but rather just `My Link`. Set to `'href'` to return the URL instead of the name.|
 | **char_set** | `'auto'` | Specify a specific character set.  Pass multiple character sets (comma separated) to detect encoding, default is ASCII,UTF-8 |
 
 Pass along options as a second argument to `convert`, for example:

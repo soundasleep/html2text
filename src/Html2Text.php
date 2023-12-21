@@ -477,7 +477,9 @@ class Html2Text {
 					} else {
 						// replace it
 						if ($output) {
-							if ($options['drop_links']) {
+							if ($options['drop_links'] === 'href') {
+								$output = str_replace(' ', '+', $href);
+							} elseif ($options['drop_links']) {
 								$output = "$output";
 							} else {
 								$output = "[$output]($href)";
