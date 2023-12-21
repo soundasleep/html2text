@@ -91,6 +91,14 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 		$this->doTestWithResults("anchors", "anchors.no-links", ['drop_links' => true]);
 	}
 
+	public function testBasicHRefLinks(): void {
+		$this->doTestWithResults("basic", "basic.href-links", ['drop_links' => 'href']);
+	}
+
+	public function testAnchorsHRefLinks(): void {
+		$this->doTestWithResults("anchors", "anchors.href-links", ['drop_links' => 'href']);
+	}
+
 	public function testWindows1252(): void {
 		$this->doTestWithResults("windows-1252-example", "windows-1252-example", ['char_set' => 'windows-1252']);
 	}
