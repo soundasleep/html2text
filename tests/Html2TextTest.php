@@ -38,7 +38,7 @@ class Html2TextTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/** @return array<array<string>> */
-	public function providerFiles(): array {
+	public static function providerFiles(): array {
 		return [
 			['basic'],
 			['anchors'],
